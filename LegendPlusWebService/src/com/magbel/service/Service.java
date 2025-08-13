@@ -135,15 +135,15 @@ public class Service extends ChartCreator {
 							     //System.out.println("-->size of Creation Asset in Capitalized>--> "+list.size());
 							     //Iso Starts	
 
-							     for(int i=0;i<list_iso.size();i++)
-							     {
-							    	 String finacleTransId=(String) list_iso.get(i);
+							    // for(int i=0;i<list_iso.size();i++)
+							    // {
+							    //	 String finacleTransId=(String) list_iso.get(i);
 							    //	 System.out.println("-->>--> "+finacleTransId);
-							    	 String isoValue=comp.getFinacleRecords(finacleTransId); 
+							    //	 String isoValue=comp.getFinacleRecords(finacleTransId); 
 							    //	 System.out.println("-->isoValue>--> "+isoValue);
-							    	 if(isoValue.equalsIgnoreCase("000"))
-							    		 comp.updateSqlRecords(isoValue, finacleTransId);
-							     }
+							    //	 if(isoValue.equalsIgnoreCase("000"))
+							    //		 comp.updateSqlRecords(isoValue, finacleTransId,"");
+							    // }
 							     
 							     // Iso End
 								   //  if(list.size()>0){
@@ -195,7 +195,8 @@ public class Service extends ChartCreator {
 										String sbuCode = newassettrans.getSbuCode();
 										String lpo = newassettrans.getLpo();
 										String invoiceNo = newassettrans.getInvoiceNo();
-										String supervisorName = newassettrans.getSupervisor();
+										String supervisorName = request.getSupervisor();
+										System.out.println("<<<<<supervisorName>>>>>: "+ supervisorName);
 										String posted = newassettrans.getposted();
 										String assetId = newassettrans.getAssetId();
 										//System.out.println("<<<<<assetId: "+ assetId);
@@ -206,7 +207,7 @@ public class Service extends ChartCreator {
 										double vatvalue = newassettrans.getVatValue();
 										String tranType = newassettrans.getTranType();
 										int whtaxrate = (int)whtaxvalue;
-										int noofitems = newassettrans.getNoofitems();
+										int noofitems = request.getNoOfItem();
 										String systemIp = newassettrans.getSystemIp();
 										String location = newassettrans.getLocation();
 										String spare1 = newassettrans.getSpare1();
@@ -225,7 +226,7 @@ public class Service extends ChartCreator {
 //										boolean tempdone = comp.newassetinterface(integrifyId,"P");
 									//	String groupitemsNo = comp.findObject("SELECT count(*) FROM NEW_GROUP_ASSET_INTERFACE WHERE POSTED = 'N' AND TRAN_TYPE = 'N' AND INTEGRIFY_ID = '"+integrifyId+"'");
 										//int recpend = Integer.parseInt(groupitemsNo);
-									//	System.out.println("integrifyId>>>>>> "+integrifyId+"  noofitems:  "+noofitems+" oldintegrify: "+oldintegrify+" recpend:  "+recpend);
+									System.out.println("integrifyId>>>>>> "+integrifyId+"  noofitems:  "+noofitems+" oldintegrify: "+oldintegrify);
 										String errorMessage = "";
 										String tablename = "";
 										String transtype = "";
@@ -247,7 +248,7 @@ public class Service extends ChartCreator {
 										 String supervisor_confirm = "";
 										 String user_confirm = "";
 										 String UserID = "";
-										 String supervisor = "";
+										 String supervisor = request.getSupervisor();
 										 double vatrate = 0.0;
 										 String approvedbyName = "";
 										 String groupexist = "";
@@ -257,139 +258,185 @@ public class Service extends ChartCreator {
 									      boolean donetemp = false;
 //									      System.out.println("=====posted: "+posted+"   assetstatus: "+assetstatus+"  errorMessage: "+errorMessage+"    assetId: "+assetId+"  assetCode: "+assetCode+"    Counter: "+k);
 									     // System.out.println("=====integrifyId: "+integrifyId+"   tempIntegrify: "+tempIntegrify);
-									     if(integrifyId!=tempIntegrify){
-									      errorMessage = "Process Ongoing; ";
-									       donetemp = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
-									     }
-									      
+									    // if(integrifyId!=tempIntegrify){
+									     // errorMessage = "Process Ongoing; ";
+									       //donetemp = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+									     //}
+									 	 try {
 										// String branch_id = "";
 //										 System.out.println("User Name>>>>>> "+UserName); 
 										//errorMessage=""; assetstatus = "P";
 										//comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 										 integrifyIdexist = comp.findObject("SELECT INTEGRIFY FROM AM_ASSET WHERE INTEGRIFY = '"+integrifyId+"'");
 										// System.out.println("Integrify Id Before Looping: "+integrifyIdexist+" User Name: "+UserName );
-										 String groupitemsNo = comp.findObject("SELECT count(*) FROM NEW_GROUP_ASSET_INTERFACE WHERE POSTED = 'N' AND TRAN_TYPE = 'N' AND INTEGRIFY_ID = '"+compintegrifyId+"'");
-//										 System.out.println("Group Item Number>>>>>> "+groupitemsNo+"  compintegrifyId: "+compintegrifyId);
+										 //String groupitemsNo = comp.findObject("SELECT count(*) FROM NEW_GROUP_ASSET_INTERFACE WHERE POSTED = 'N' AND TRAN_TYPE = 'N' AND INTEGRIFY_ID = '"+compintegrifyId+"'");
+										 String groupitemsNo = String.valueOf(noofitems);
+										 System.out.println("groupitemsNo>>>>>> "+groupitemsNo); 
+										 groupitemsNo =  groupitemsNo.equals(null) || groupitemsNo.equals("") ? "0" : groupitemsNo;
+										 System.out.println("Group Item Number>>>>>> "+groupitemsNo+"  compintegrifyId: "+compintegrifyId);
 										String assetRaiseEntry =comp.findObject(" SELECT raise_entry from am_gb_company ");
 										String branch_id = comp.findObject("SELECT BRANCH_ID FROM am_ad_branch WHERE BRANCH_CODE = '"+branchCode+"' ");
 										String budgetValue = comp.findObject("SELECT BALANCE_ALLOCATION FROM AM_ACQUISITION_BUDGET WHERE BRANCH_ID = '"+branchCode+"' AND CATEGORY_CODE = '"+categoryCode+"' AND SUB_CATEGORY_CODE = '"+subcategoryCode+"' AND SBU_CODE = '"+sbuCode+"' ");
 									//	System.out.println("budgetValue >>>>>> "+budgetValue+"  noofitems: "+noofitems);
 										String budgetenfoced =comp.findObject(" SELECT enforce_acq_budget from am_gb_company ");
-										 if(supervisorName==null){  
+										 if(supervisorName==null || supervisorName.equals("")){  
 										      assetstatus = "C"; 
 										      errorMessage = "Suppervisor Id must be provided; ";
-										      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
-										 }	
-										 if(UserName==null){
+										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+										 }
+										
+										 if(UserName==null || UserName.equals("")){
 										      assetstatus = "C";
 										      errorMessage = "User Id must be provided; ";
-										      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 										 }
-										 if(Description==null){
+										 if(Description==null || Description.equals("")){
 										      assetstatus = "C";  
-										      errorMessage = "Description must be provided; ";
-										      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+										      errorMessage = errorMessage+"Description must be provided; ";
+										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 										 }	
-										 if(branch_id==null){
+										 if(branch_id==null || branch_id.equals("")){
 										      assetstatus = "C";
-										      errorMessage = "Branch Code must be provided; ";
-										      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+										      errorMessage = errorMessage+"Branch Code must be provided; ";
+										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 										 }	
 										 if(budgetenfoced.equals("Y")){
 										 if((budgetValue=="")||(budgetValue==null)){  
 										      assetstatus = "C"; 
-										      errorMessage = "No Budget for this Asset; ";
-										      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+										      errorMessage = errorMessage+"No Budget for this Asset; ";
+										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 										 }	
 										 }
 										 if(budgetenfoced.equals("Y")||(budgetValue!="")){
 										 if(CostPrice > Double.parseDouble(budgetValue)){
 										      assetstatus = "C";
 										      errorMessage = "Addition of Asset will over shoot quarterly budget for this category and you are not allowed to do so. Please exit and seek supplementary budgetary Allocation; ";
-										      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 										 }			 
 										 }
-								//		 System.out.println("supervisorName 2>>>>>> "+supervisorName);
-										if(supervisorName==null){supervisorName="";}
-								//		System.out.println("UserName 2>>>>>> "+UserName);
-										if(!UserName.equalsIgnoreCase("") && UserName!=null){user_confirm = comp.findObject("select full_name from am_gb_user where user_name = '"+UserName+"' AND USER_STATUS = 'ACTIVE'");}
-										if(!UserName.equalsIgnoreCase("") && UserName!=null){UserID = comp.findObject("select USER_ID from am_gb_user where user_name = '"+UserName+"' AND USER_STATUS = 'ACTIVE'");}
-										if(!supervisorName.equalsIgnoreCase("")){supervisor = comp.findObject("select USER_ID from am_gb_user where user_name = '"+supervisorName+"' AND USER_STATUS = 'ACTIVE'");}
-									//System.out.println("supervisor 2>>>>>> "+supervisor);
-										if(supervisor==null){supervisor="0";}
-										if(UserName==null){UserName="";}
-										if(!supervisorName.equalsIgnoreCase("") && (supervisorName!=null))
-										{ if(!branch_id.equalsIgnoreCase("")){supervisor_confirm = comp.findObject("select full_name from am_gb_user where user_Name = '"+supervisorName+"' AND IS_SUPERVISOR = 'Y' AND BRANCH = "+branch_id+" AND USER_STATUS = 'ACTIVE'");}}
-										double treshhold =Double.parseDouble(comp.findObject(" SELECT Cost_Threshold from am_gb_company "));
-										int numOfTransactionLevel =  comp.getNumOfTransactionLevel("27");
-//										System.out.println("Description: "+Description);
-										if((supervisor==null) || (supervisor=="")){supervisor="0";}
-										//System.out.println("Supervisor by Id After Zerorising: "+supervisor);
-										if(supervisor!="0"){approvedbyName =comp.findObject(" SELECT full_name from am_gb_user where user_id="+Integer.parseInt(supervisor)+"");}
-										//System.out.println("numOfTransactionLevel>>>>>> "+numOfTransactionLevel+"  User Confirm: "+user_confirm);
-										if(supervisor=="0"){approvedbyName="Supervisor Not Found";}
-									//	System.out.println("Supervisor by Id After: "+supervisor);
-									//	System.out.println("Approved by Name: "+approvedbyName);
+										 System.out.println("supervisorName : >>>>>> " + supervisorName);
+
+										 if (supervisorName == null || supervisorName.equals("")) {
+										     supervisorName = "";
+										 }
+
+										 System.out.println("UserName 2>>>>>> " + UserName);
+
+										 if (UserName != null && !UserName.equalsIgnoreCase("")) {
+										     user_confirm = comp.findObject("SELECT full_name FROM am_gb_user WHERE user_name = '" + UserName + "' AND USER_STATUS = 'ACTIVE'");
+										     UserID = comp.findObject("SELECT USER_ID FROM am_gb_user WHERE user_name = '" + UserName + "' AND USER_STATUS = 'ACTIVE'");
+										 }
+
+										 if (supervisorName != null && !supervisorName.equalsIgnoreCase("")) {
+										     supervisor = comp.findObject("SELECT USER_ID FROM am_gb_user WHERE user_id = '" + supervisorName + "' AND USER_STATUS = 'ACTIVE'");
+										 }
+
+										 SupplierName = comp.findObject("SELECT Vendor_Code FROM am_ad_vendor WHERE Vendor_Code = '" + SupplierName + "'");
+										 System.out.println("supervisor 2>>>>>> " + supervisor);
+
+										 if (supervisor == null) {
+										     supervisor = "0";
+										 }
+
+										 System.out.println("supervisor 2B>>>>>> " + supervisor);
+
+										 if ("0".equals(supervisor) || supervisor.equals("") || supervisorName.equals("") || supervisor.equals(null)) {
+											 System.out.println("supervisor 2B+>>>>>> " + supervisor);
+											 assetstatus = "C"; 
+										     errorMessage = errorMessage+"Supervisor Not Found or Incorrect Supervisor; ";
+										 }
+
+										 if (UserName == null) {
+										     UserName = "";
+										 }
+
+										 if (supervisorName != null && !supervisorName.equalsIgnoreCase("") && branch_id != null && !branch_id.equalsIgnoreCase("")) {
+										     supervisor_confirm = comp.findObject("SELECT full_name FROM am_gb_user WHERE user_Name = '" + supervisorName + "' AND IS_SUPERVISOR = 'Y' AND BRANCH = " + branch_id + " AND USER_STATUS = 'ACTIVE'");
+										 }
+
+										 double threshold = Double.parseDouble(comp.findObject("SELECT Cost_Threshold FROM am_gb_company"));
+										 int numOfTransactionLevel = comp.getNumOfTransactionLevel("27");
+
+										 if (!"0".equals(supervisor)) {
+										     approvedbyName = comp.findObject("SELECT full_name FROM am_gb_user WHERE user_id = " + Integer.parseInt(supervisor));
+										 } else {
+										     approvedbyName = "Supervisor Not Found";
+										 }
+
+										 System.out.println("Supervisor by Id After: " + supervisor);
+										 System.out.println("Approved by Name: " + approvedbyName);
+
+										 if (approvedbyName == null || approvedbyName.equals("")) {
+											 assetstatus = "C"; 
+										     errorMessage = "Supervisor Not Found or Incorrect Supervisor; ";
+										 }
+
+//										if(supervisor.equals("0") || supervisorName.equals("0")) {
+//											errorMessage = "Supervisor Not Found; ";
+//										}
 //										 if(!integrifyIdexist.equalsIgnoreCase("")){
 //											 System.out.println("======errorMessage: "+errorMessage);
 //										      assetstatus = "C";
 //										      errorMessage = "Asset Already Posted; ";
-//										      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+//										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 //										 }
-										 try {
-											 errorMessage = "";
+									
+											// errorMessage = "";
 //											 System.out.println("======errorMessage: "+errorMessage+"     integrifyIdexist: "+integrifyIdexist);
 //											 if(!integrifyIdexist.equalsIgnoreCase("")){
 //												 System.out.println("======errorMessage: "+errorMessage);
 //											      assetstatus = "C";
 //											      errorMessage = "Asset Already Posted; ";
-//											      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+//											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 //											 }	
 											 if(branch_id==""){
 											      assetstatus = "C";
 											      errorMessage = errorMessage +"Invalid Branch Id; ";
-											      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 											 }				 
 											 if(user_confirm.equalsIgnoreCase("")){
 											      assetstatus = "C";
 											      errorMessage = errorMessage+"Invalid User Name; ";
-											      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 											 }				 
 											 if(Datepurchased==null){
 											      assetstatus = "C";
 											      errorMessage = errorMessage+"Purchase Date Cannot be empty; ";
-											      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 											 }	
 										//	 System.out.println("PostingDate:  "+PostingDate);
 											 if(PostingDate==null){
 											      assetstatus = "C";
 											      errorMessage = errorMessage+"Posting Date Cannot be empty; ";
-											      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 											 }		
 											 if(EffectiveDate==null){
 											      assetstatus = "C";
 											      errorMessage = errorMessage+"Effective Date Cannot be empty; ";
-											      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 											 }					 
 											 if(numOfTransactionLevel!=0){
 											 if(supervisor_confirm.equalsIgnoreCase("")){
 											      assetstatus = "C";
 											      errorMessage = errorMessage+"Invalid Supervisor; ";
-											      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 											 }	
 											 }
 											// System.out.println("WhTax:  "+WhTax+"   SubjectTOVat: "+SubjectTOVat);
 											 if((!WhTax.equalsIgnoreCase("S")) && (!WhTax.equalsIgnoreCase("F")) && (!WhTax.equalsIgnoreCase("N"))){
 											      assetstatus = "C";
 											      errorMessage = errorMessage+"Invalid Withholding Tax Parameter; ";
-											      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 											 }					 
 											 //if((!SubjectTOVat.equalsIgnoreCase("Y")) && (!SubjectTOVat.equalsIgnoreCase("N"))){
 											 if((!SubjectTOVat.equalsIgnoreCase("Y")) && (!SubjectTOVat.equalsIgnoreCase("N"))){				 
 											      assetstatus = "C";
 											      errorMessage = errorMessage+"Invalid Vat Parameter It Must be Y OR N; ";
-											      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
-											 }					 
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+											 }	
+											 
+											 if(SupplierName.equalsIgnoreCase("")) {errorMessage = errorMessage + " Invalid Vendor : ";}
+
 											// System.out.println("assettype: "+assettype );
 											// System.out.println(" error message after assettype: "+errorMessage );
 											 //integrifyIdexist = comp.findObject("SELECT INTEGRIFY_ID FROM Am_Invoice_no WHERE INTEGRIFY_ID = '"+integrifyId+"'");
@@ -398,11 +445,11 @@ public class Service extends ChartCreator {
 												// System.out.println("Capitalised CostPrice: "+CostPrice+"  treshhold: "+treshhold);
 												 double cost_price = VatableCost + VatableCost*(vatvalue/100);
 												// System.out.println("Capitalised cost_price: "+cost_price+"  VatableCost: "+VatableCost+"  whtaxrate: "+whtaxrate);
-												 if(cost_price < treshhold+0.01){
+												 if(cost_price < threshold+0.01){
 												      assetstatus = "C";
 												      errorMessage = errorMessage +"This Asset cannot be Capitalised; ";
 												  //    System.out.println(" error message inside asset type C "+errorMessage );
-												      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+												      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 												 }
 												// assetexist = comp.findObject("SELECT ASSET_ID FROM AM_ASSET WHERE INTEGRIFY = '"+integrifyId+"' AND GROUP_ID = "+noofitems+"");
 												 tablename = "AM_ASSET";
@@ -432,7 +479,7 @@ public class Service extends ChartCreator {
 												 if(request.Total_CostPrice != CostPrice){
 												      assetstatus = "C";
 												      errorMessage = errorMessage +"Summary and Detail Total not Equal; ";
-												      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+												      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 												 }
 											 }	
 											 
@@ -446,7 +493,7 @@ public class Service extends ChartCreator {
 												 if(request.Total_CostPrice != CostPrice){
 												      assetstatus = "C";
 												      errorMessage = errorMessage +"Summary and Detail Total not Equal; ";
-												      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+												      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 												 }
 											 }	
 											 
@@ -484,7 +531,7 @@ public class Service extends ChartCreator {
 //												 if(!integrifyIdexist.equalsIgnoreCase("")){					 
 //											      assetstatus = "C";
 //											      errorMessage = "Asset already Posted ";
-//											      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+//											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 //										//	      System.out.println("Record Not Successfully Updated because assetexist 2>>> "+integrifyIdexist+" errorMessage: "+errorMessage);
 //											 }
 //											      else{
@@ -495,7 +542,7 @@ public class Service extends ChartCreator {
 //												 if(!integrifyIdexist.equalsIgnoreCase("")){					 
 //											      assetstatus = "C";
 //											      errorMessage = "Asset already Posted ";
-//											      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+//											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 //											      System.out.println("Record Not Successfully Updated because assetexist >>>> "+integrifyIdexist+" errorMessage: "+errorMessage);
 //											 }else{
 //												 
@@ -511,6 +558,7 @@ public class Service extends ChartCreator {
 											 String cat_id = comp.findObject("SELECT CATEGORY_ID FROM am_ad_category WHERE CATEGORY_CODE = '"+categoryCode+"'");
 											 String sub_cat_id = comp.findObject("SELECT SUB_CATEGORY_ID FROM AM_AD_SUB_CATEGORY WHERE SUB_CATEGORY_CODE = '"+subcategoryCode+"'");
 											 String invoice_confirm = comp.findObject("SELECT *FROM AM_INVOICE_NO WHERE INVOICE_NO = '"+invoiceNo+"'");
+											
 											// String lpo_confirm = comp.findObject("SELECT *FROM AM_INVOICE_NO WHERE LPO = '"+lpo+"'");
 											 System.out.println("branch_confirm>>>>>> "+invoice_confirm+"  section_confirm:  "+section_id+" dept_confirm: "+dept_id
 													 +" cat_confirm: "+cat_id+" invoice_confirm: "+invoice_confirm);
@@ -535,8 +583,8 @@ public class Service extends ChartCreator {
 													State,Driver,UserID,branchCode,sectionCode,deptCode,categoryCode,subcategoryCode,barCode,sbuCode,lpo,invoiceNo,
 													supervisor,posted,assetId,assetCode,assettype,branch_id,dept_id,section_id,cat_id,sub_cat_id,vatamount,residualvalue,whtaxrate,
 													location,memovalue,memo,spare1,spare2,spare3,spare4,spare5,spare6,multiple,projectCode,groupId,delimiter);
-											 		errorMessage=""; assetstatus = "P";
-													comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+											 		errorMessage=""; assetstatus = "A";
+												//	comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 													
 													System.out.println("Asset Statusx>>>>>> "+statux);
 											 if(statux == 0 )
@@ -549,24 +597,28 @@ public class Service extends ChartCreator {
 												 String msgText11 ="Asset with ID: "+ assetId +" is waiting for your approval.";	
 											 System.out.println("ASSET ID: "+assetId+"  Statux:  "+statux+" assetCode: "+assetCode+" LPO: "+lpo+" invoiceNo: "+invoiceNo+" Trans Type: "+transtype);
 											 comp.insToAm_Invoice_No(assetId, lpo, invoiceNo, transtype,integrifyId);
-											 System.out.println("ASSET Successfully Posted>>> ");
+											 
 										//	if(!assetId.equalsIgnoreCase("")){errorMessage="Successfully Posted"; assetstatus = "Y";
 												//		  comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 													//	  System.out.println("Record Successfully Updated 1>>> ");
 										//				 }
-										}
+										
 											  if(numOfTransactionLevel == 0)
 												 // System.out.println("numOfTransactionLevel: "+numOfTransactionLevel);
 												  
 											  {
 												  if(comp.updateNewAssetStatux(assetId, tablename))
 												  {
+													
 													  if(postCount==0){
-													  System.out.println("======postCount: "+postCount);
+													 // System.out.println("======postCount: "+postCount);
 													  comp.setPendingTrans(comp.setApprovalData(assetId,assettype),"27",Integer.parseInt(assetCode));
+												
 													  String lastMTID = comp.getCurrentMtid("am_asset_approval");
+
 													//  String currentMtid= comp.findObject(" SELECT branch_name from am_asset_approval where branch_code='"+branchCode+"'");
 													  comp.setPendingTransArchive(comp.setApprovalData(assetId,assettype),"27",Integer.parseInt(lastMTID),Integer.parseInt(assetCode));
+
 													  boolean b = comp.updateNewApprovalAssetStatus(assetId,Integer.parseInt(UserID));
 													  
 													  System.out.println("assetRaiseEntry: "+assetRaiseEntry);
@@ -616,10 +668,12 @@ public class Service extends ChartCreator {
 																comp.sendMail(to,subject,msgText1);	
 																}
 																errorMessage=" Successfully Posted "; assetstatus = "Y";
-																comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+																//comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 																postCount = postCount + 1;
+																System.out.println("ASSET Successfully Posted>>> ");
 												  }
 												  }
+											  }
 											  }
 											  else{	
 												  System.out.println("Asset Code Outside updateNewAssetStatux: "+assetCode+"  assetId: "+assetId);
@@ -636,7 +690,7 @@ public class Service extends ChartCreator {
 													if(noofitems==0){assetstatus = "Y";
 													}else{assetstatus = "N";}
 													errorMessage=" Asset creation submitted for approval "; 
-													comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+												//	comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 
 											  }	
 										}	
@@ -680,7 +734,7 @@ public class Service extends ChartCreator {
 											      errorMessage = " Successfully Posted ";
 											      if(assetCode==null){assetCode = "0";}
 											      System.out.println("Status for Group Asset First : " + assetstatus+"  groupAssetId: "+groupAssetId+"  assetCode: "+assetCode);
-											      donetemp = comp.newassetinterface(errorMessage, integrifyId,assetstatus,groupAssetId,assetCode);
+											     // donetemp = comp.newassetinterface(errorMessage, integrifyId,assetstatus,groupAssetId,assetCode);
 //											      System.out.println("Status for Group Asset First : " + assetstatus+"  groupAssetId: "+groupAssetId);
 												 }
 //												 System.out.println("insertGroupAssetRecord statuk value:  "+statuk+"  <<<<<integrifyId: "+integrifyId);
@@ -733,7 +787,7 @@ public class Service extends ChartCreator {
 												}else{assetstatus = "N";}
 												assetCode = " ";
 											 errorMessage=" Asset creation submitted for approval "; //assetstatus = "Y";
-											 comp.newassetinterface(errorMessage, integrifyId,assetstatus,groupid,assetCode);
+											// comp.newassetinterface(errorMessage, integrifyId,assetstatus,groupid,assetCode);
 												 }
 											 else{
 												if(noofitems!=0){assetstatus = "Y";
@@ -861,7 +915,7 @@ public class Service extends ChartCreator {
 														 if(recuser_confirm.equalsIgnoreCase("")){
 														      assetstatus = "C";
 														      errorMessage = "Invalid User Name "+errorindex;
-														      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+														      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 														      if(assettype.equalsIgnoreCase("C")){ 
 														      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");}
 														      }
@@ -877,7 +931,7 @@ public class Service extends ChartCreator {
 														 if(recsupervisor_confirm.equalsIgnoreCase("")){
 														      assetstatus = "C";
 														      errorMessage = "Invalid Supervisor "+errorindex;
-														      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+														      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 														      if(assettype.equalsIgnoreCase("C")){ 
 														      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");}
 														      }
@@ -893,7 +947,7 @@ public class Service extends ChartCreator {
 														 if((!recWhTax.equalsIgnoreCase("S"))&&(!recWhTax.equalsIgnoreCase("F")) && (!WhTax.equalsIgnoreCase("N"))){
 														      assetstatus = "C";
 														      errorMessage = "Invalid Withholding Tax Parameter in  "+errorindex;
-														      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+														      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 														      if(assettype.equalsIgnoreCase("C")){ 	
 														      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");}
 														      }
@@ -908,7 +962,7 @@ public class Service extends ChartCreator {
 														 if((!recSubjectTOVat.equalsIgnoreCase("Y"))&&(!recSubjectTOVat.equalsIgnoreCase("N"))){
 														      assetstatus = "C";
 														      errorMessage = "Invalid Withholding Tax Parameter "+errorindex;
-														      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+														      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 														      if(assettype.equalsIgnoreCase("C")){ 	
 														      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");}
 														      }
@@ -993,13 +1047,13 @@ public class Service extends ChartCreator {
 														 if(noofitems!=0){assetstatus = "Y";
 															}else{assetstatus = "N";}
 														 errorMessage="Asset creation submitted for approval"; //assetstatus = "Y";
-														 comp.newgroupassetinterface(errorMessage, recno,assetstatus,assetId,assetCode,recintegrifyId);
+														 //comp.newgroupassetinterface(errorMessage, recno,assetstatus,assetId,assetCode,recintegrifyId);
 													     }
 														 else{
 															 if(noofitems!=0){assetstatus = "Y";
 																}else{assetstatus = "N";}								 
 															 errorMessage=" Successfully Posted "; //assetstatus = "Y";
-															 comp.newgroupassetinterface(errorMessage, recno,assetstatus,assetId,assetCode,recintegrifyId);								 
+															 //comp.newgroupassetinterface(errorMessage, recno,assetstatus,assetId,assetCode,recintegrifyId);								 
 														 }
 											        }
 												
@@ -1007,7 +1061,7 @@ public class Service extends ChartCreator {
 													else{
 													      assetstatus = "C";
 													      //errorMessage = "Invalid User Name "+i;
-													      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+													      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 													      if(assettype.equalsIgnoreCase("C")){ 	
 													      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");}
 													      }
@@ -1035,13 +1089,13 @@ public class Service extends ChartCreator {
 													System.out.println("Final Group Id: "+groupAssetId);
 												      assetstatus = "Y";
 												      errorMessage = "Successfully Posted; ";
-												      donetemp = comp.newassetinterface(errorMessage, integrifyId,assetstatus,groupAssetId,assetCode);
+												    //  donetemp = comp.newassetinterface(errorMessage, integrifyId,assetstatus,groupAssetId,assetCode);
 
 											}
 												 else{
 												      assetstatus = "C";
 												      errorMessage = "Quantity is not Equal to Record Number";
-												      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+												      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 												      if(assettype.equalsIgnoreCase("C")){ 	
 												      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");}
 												      }
@@ -1062,21 +1116,21 @@ public class Service extends ChartCreator {
 											 }
 										else{
 											 assetstatus = "C";
-											boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+											// boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 										//	System.out.println("Record Successfully Updated 2>>> ");
 											}
 							/*			 } //Integrify Exist
 										 else{ 
 										      assetstatus = "C";
 										      errorMessage = "Integrify Id already exists";
-										      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 										 //     System.out.println("Record Successfully Updated 2>>> ");
 										 }*/
 										 }
 											 else{
 											      assetstatus = "C";
 											      errorMessage = "Invoice Can not be Null";
-											      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 											//      System.out.println("Record Successfully Updated 3>>> ");
 											 }
 
@@ -1184,7 +1238,7 @@ public class Service extends ChartCreator {
 														 pa[6]= EffectiveDate; 
 														 pa[8]="ACTIVE"; 
 														 pa[9]="Asset Improvement"; 
-														 pa[10]="P"; 
+														 pa[10]="A"; 
 														 System.out.println("numOfTransactionLevel Try 1 End "+numOfTransactionLevel);
 														 comp.insToAm_Invoice_No(assetId,lpo,invoiceNo,"Asset Improvement",integrifyId); 
 															newCost = CostPrice;
@@ -1233,7 +1287,7 @@ public class Service extends ChartCreator {
 														     		 //THE SEGMENT ENDS RAISE ENTRY FOR NEW ASSET CREATION THAT DOESN'T REQUIRE APPROVAL
 
 														     		 errorMessage = "Asset improvement successfully"; assetstatus = "Y";
-														     		 boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+														     		 // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 														     		postImproveCount = postImproveCount + 1;
 														 }
 														 }	
@@ -1254,27 +1308,27 @@ public class Service extends ChartCreator {
 															String msgText11 ="Asset with ID: "+ assetId +" is waiting for your approval.";
 															comp.sendMailSupervisor(supervisor, subjectr, msgText11);								
 												     		 errorMessage = "Transaction submitted for approval"; assetstatus = "Y";					     		
-												     		 boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+												     		 // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 														 }
 											      System.out.println("Record Successfully Updated 3>>> ");
 													 }
 													 else{
 													      assetstatus = "C";
 													      errorMessage = "Improvement has been done on this asset this month. Cannot be initiated for Improvement OR Asset is still pending for approval. Cannot be initiated for Improvement";
-													      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+													      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 													      System.out.println("Record Successfully Updated 3>>> ");
 													 }						 
 												 }
 													 else{
 													      assetstatus = "C";
 													      errorMessage = "Asset Id Can not be Null or empty ";
-													      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+													      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 													      System.out.println("Record Successfully Updated 3>>> ");
 													 }	
 												 }else{
 												      assetstatus = "C";
 												      errorMessage = "Asset Improvement Can not be duplicated ";
-												      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+												      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 												      System.out.println("Record Successfully Updated 3>>> ");
 												 }	
 											 }
@@ -1285,16 +1339,16 @@ public class Service extends ChartCreator {
 							/*			 else{ 
 										      assetstatus = "C";
 										      errorMessage = "Integrify Id already exists";
-										      boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 										 //     System.out.println("Record Successfully Updated 2>>> ");
 										 }*/				 
 											 //else() Integrify Test
 											 oldintegrify=integrifyId;
 											//errorMessage = "";
-											 System.out.println("====List Size: "+k);
+											// System.out.println("====List Size: "+k);
 											 k++;
 											 data.put("asset_id", assetId);
-											 data.put("error_message", errorMessage);
+											 data.put("message", errorMessage);
 											 } finally {
 												 System.out.println(
 											                "execution complete..");
@@ -1310,6 +1364,9 @@ public class Service extends ChartCreator {
 				return data.toString();			
 	
 	}
+	
+	
+	
 	
 	@GET 
 	@Path("/getPayload")

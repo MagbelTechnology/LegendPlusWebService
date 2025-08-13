@@ -87,13 +87,13 @@ public class NewAssetRecords {
 	    newTransaction.setRegistrationNo(request.Registration_No);
 	    newTransaction.setVendorAC(request.Vendor_AC);
 	    newTransaction.setDatepurchased(request.Date_purchased);
-	    newTransaction.setAssetMake(request.Asset_Make);
+	    newTransaction.setAssetMake(String.valueOf(request.Asset_Make));
 	    newTransaction.setAssetModel(request.Asset_Model);
 	    newTransaction.setAssetSerialNo(request.Asset_Serial_No);
 	    newTransaction.setAssetEngineNo(request.Asset_Engine_No);
 	    newTransaction.setSupplierName(request.Supplier_Name);
 	    newTransaction.setAssetUser(request.Asset_User);
-	    newTransaction.setAssetMaintenance(request.Asset_Maintenance);
+	    newTransaction.setAssetMaintenance(String.valueOf(request.Asset_Maintenance));
 	    newTransaction.setCostPrice(request.Cost_Price);
 	    newTransaction.setAuthorizedBy(request.Authorized_By);
 	    newTransaction.setWhTax(request.Wh_Tax);
@@ -102,7 +102,7 @@ public class NewAssetRecords {
 	    newTransaction.setPurchaseReason(request.Purchase_Reason);
 	    newTransaction.setSubjectTOVat(request.Subject_TO_Vat);
 	    newTransaction.setAssetStatus(request.Asset_Status);
-	    newTransaction.setState(request.State);
+	    newTransaction.setState(String.valueOf(request.State));
 	    newTransaction.setDriver(request.Driver);
 	    newTransaction.setUserID(request.User_ID);
 	    newTransaction.setBranchCode(request.BRANCH_CODE);
@@ -124,7 +124,7 @@ public class NewAssetRecords {
 	    newTransaction.setWhTaxValue(request.Wh_Tax_Value);
 	    newTransaction.setVatValue(request.Vat_Value);
 	    newTransaction.setNoofitems(request.QUANTITY);
-	    newTransaction.setLocation(request.Location);
+	    newTransaction.setLocation(String.valueOf(request.Location));
 	    newTransaction.setSpare1(request.Spare_1);
 	    newTransaction.setSpare2(request.Spare_2);
 	    newTransaction.setSpare3(request.Spare_3);
@@ -136,12 +136,14 @@ public class NewAssetRecords {
 	    newTransaction.setMemovalue(request.MemoValue);
 	    newTransaction.setUsefullife(request.IMPROV_USEFULLIFE);
 	    newTransaction.setProjectCode(request.PROJECT_CODE);
+	    newTransaction.setNoofitems(request.NoOfItem);
 	   // newTransaction.setSystemIP(request.System_IP);
 
 	    list.add(newTransaction);
 	    return list;
 	}
 
+	
 
 	public ArrayList getNewAssetSqlRecordsForCapitalised(String strintegrifyId, String strDescription,
 			String strRegistrationNo, String strVendorAC, String strSupplierName, String strDatepurchased,

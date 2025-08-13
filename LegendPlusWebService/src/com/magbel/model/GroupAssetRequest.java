@@ -1,19 +1,19 @@
 package com.magbel.model;
 
-public class NewAssetRequest {
+public class GroupAssetRequest {
 	
     public String INTEGRIFY_ID;
     public String Description;
     public String Registration_No;
     public String Vendor_AC;
     public String Date_purchased;
-    public int Asset_Make;
+    public String Asset_Make;
     public String Asset_Model;
     public String Asset_Serial_No;
     public String Asset_Engine_No;
     public String Supplier_Name;
     public String Asset_User;
-    public int Asset_Maintenance;
+    public String Asset_Maintenance;
     public double Cost_Price;
     public String Authorized_By;
     public String Wh_Tax;
@@ -22,7 +22,7 @@ public class NewAssetRequest {
     public String Purchase_Reason;
     public String Subject_TO_Vat;
     public String Asset_Status;
-    public int State;
+    public String State;
     public String Driver;
     public String User_ID;
     public String BRANCH_CODE;
@@ -44,7 +44,7 @@ public class NewAssetRequest {
     public double Wh_Tax_Value;
     public double Vat_Value;
     public int QUANTITY;
-    public int Location;
+    public String Location;
     public String Spare_1;
     public String Spare_2;
     public String Spare_3;
@@ -59,6 +59,9 @@ public class NewAssetRequest {
     public String System_IP;
     public double Total_CostPrice;
     public int NoOfItem;
+
+    
+    
 	public String getINTEGRIFY_ID() {
 		return INTEGRIFY_ID;
 	}
@@ -89,10 +92,10 @@ public class NewAssetRequest {
 	public void setDate_purchased(String date_purchased) {
 		Date_purchased = date_purchased;
 	}
-	public int getAsset_Make() {
+	public String getAsset_Make() {
 		return Asset_Make;
 	}
-	public void setAsset_Make(int asset_Make) {
+	public void setAsset_Make(String asset_Make) {
 		Asset_Make = asset_Make;
 	}
 	public String getAsset_Model() {
@@ -125,10 +128,10 @@ public class NewAssetRequest {
 	public void setAsset_User(String asset_User) {
 		Asset_User = asset_User;
 	}
-	public int getAsset_Maintenance() {
+	public String getAsset_Maintenance() {
 		return Asset_Maintenance;
 	}
-	public void setAsset_Maintenance(int asset_Maintenance) {
+	public void setAsset_Maintenance(String asset_Maintenance) {
 		Asset_Maintenance = asset_Maintenance;
 	}
 	public double getCost_Price() {
@@ -179,10 +182,10 @@ public class NewAssetRequest {
 	public void setAsset_Status(String asset_Status) {
 		Asset_Status = asset_Status;
 	}
-	public int getState() {
+	public String getState() {
 		return State;
 	}
-	public void setState(int state) {
+	public void setState(String state) {
 		State = state;
 	}
 	public String getDriver() {
@@ -311,10 +314,10 @@ public class NewAssetRequest {
 	public void setQUANTITY(int qUANTITY) {
 		QUANTITY = qUANTITY;
 	}
-	public int getLocation() {
+	public String getLocation() {
 		return Location;
 	}
-	public void setLocation(int location) {
+	public void setLocation(String location) {
 		Location = location;
 	}
 	public String getSpare_1() {
@@ -401,10 +404,6 @@ public class NewAssetRequest {
 	public void setNoOfItem(int noOfItem) {
 		NoOfItem = noOfItem;
 	}
-
-    
-    
-	
     
     
     

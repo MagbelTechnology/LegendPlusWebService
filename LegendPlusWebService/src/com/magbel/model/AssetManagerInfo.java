@@ -53,8 +53,23 @@ public class AssetManagerInfo {
     private String asset_defer_status;
     private String part_pay_status;
     private String thirdpartytransaction="N";
+    private String raiseEntry="N";
+    private String lossDisposalAcct;
+    private String LDAcctStatus;
+    private String groupAssetAcct;
+    private String GAAStatus;
+    private String selfChargeAcct;
+    private String selfChargeStatus;
+    private String databaseName;
 
-
+	private String financialStartDate = ""; // smalldatetime
+	private int financialNoOfMonths = 0;
+	private String financialEndDate = ""; // smalldatetime
+	
+	private double vatRate = 0;
+	private double whtRate = 0;
+	private double fedwhtRate = 0; 	
+    private String comp_delimiter = "";
 	
 	public AssetManagerInfo(){
 		// TODO Auto-generated constructor stub
@@ -367,13 +382,13 @@ public class AssetManagerInfo {
 	public String getWhtAcctStatus() {
 		return whtAcctStatus;
 	}
-public String getFedWhtAcctStatus(){
-return fedWhtAcctStatus;
-}
-
-public void setFedWhtAcctStatus(String fedWhtAcctStatus){
-this.fedWhtAcctStatus = fedWhtAcctStatus;
-}
+	public String getFedWhtAcctStatus(){
+	return fedWhtAcctStatus;
+	}
+	
+	public void setFedWhtAcctStatus(String fedWhtAcctStatus){
+	this.fedWhtAcctStatus = fedWhtAcctStatus;
+	}
 
 /**
 	 * @param suspenseAcctStatus
@@ -633,5 +648,234 @@ this.fedWhtAcctStatus = fedWhtAcctStatus;
         this.thirdpartytransaction = thirdpartytransaction;
     }
     
-        
+
+    /**
+     * @return the raiseEntry
+     */
+    public String getRaiseEntry() {
+        return raiseEntry;
+    }
+
+    /**
+     * @param raiseEntry the raiseEntry to set
+     */
+    public void setRaiseEntry(String raiseEntry) {
+        this.raiseEntry = raiseEntry;
+    }
+
+
+    /**
+     * @return the lossDisposalAcct
+     */
+    public String getLossDisposalAcct() {
+       if(lossDisposalAcct.equalsIgnoreCase("null") || lossDisposalAcct == null){
+    	   lossDisposalAcct = "";
+       }
+
+        return lossDisposalAcct;
+    }
+
+    /**
+     * @param lossDisposalAcct the lossDisposalAcct to set
+     */
+    public void setLossDisposalAcct(String lossDisposalAcct) {
+
+        this.lossDisposalAcct = lossDisposalAcct;
+    }
+
+	/**
+	 * @param lDAcctStatus
+	 *            the lDAcctStatus to set
+	 */
+	public void setLDAcctStatus(String lDAcctStatus) {
+		LDAcctStatus = lDAcctStatus;
+	}
+
+	/**
+	 * @return the lDAcctStatus
+	 */
+	public String getLDAcctStatus() {
+		return LDAcctStatus;
+	}
+
+    /**
+     * @return the groupAssetAcct
+     */
+    public String getGroupAssetAcct() {
+       if(groupAssetAcct.equalsIgnoreCase("null") || groupAssetAcct == null){
+    	   groupAssetAcct = "";
+       }
+
+        return groupAssetAcct;
+    }
+
+    /**
+     * @param groupAssetAcct the groupAssetAcct to set
+     */
+    public void setGroupAssetAcct(String groupAssetAcct) {
+
+        this.groupAssetAcct = groupAssetAcct;
+    }
+
+	/**
+	 * @param gAAStatus
+	 *            the gAAStatus to set
+	 */
+	public void setGAAStatus(String gAAStatus) {
+		GAAStatus = gAAStatus;
+	}
+
+	/**
+	 * @return the gAAStatus
+	 */
+	public String getGAAStatus() {
+		return GAAStatus;
+	} 
+
+
+	/**
+	 * @return the selfChargeAcct
+	 */
+	public String getSelfChargeAcct() {
+		if(selfChargeAcct.equalsIgnoreCase("null") || selfChargeAcct==null){
+			selfChargeAcct ="";
+        }
+
+        return selfChargeAcct;
+	}
+
+	/**
+	 * @param selfChargeAcct the selfChargeAcct to set
+	 */
+	public void setSelfChargeAcct(String selfChargeAcct) {
+		this.selfChargeAcct = selfChargeAcct;
+	}
+	
+    /**
+     * @return the selfChargeStatus
+     */
+    public String getSelfChargeStatus() {
+        return selfChargeStatus;
+    }
+    /**
+     * @param selfChargeStatus the selfChargeStatus to set
+     */
+    public void setSelfChargeStatus(String selfChargeStatus) {
+        this.selfChargeStatus = selfChargeStatus;
+    }
+
+	/**
+	 * @return the databaseName
+	 */
+	public String getDatabaseName() {
+		if(databaseName.equalsIgnoreCase("null") || databaseName==null){
+			databaseName ="";
+        }
+
+        return databaseName;
+	}
+
+	/**
+	 * @param databaseName the databaseName to set
+	 */
+	public void setDatabaseName(String databaseName) {
+		this.databaseName = databaseName;
+	}
+	
+	/**
+	 * @param financialStartDate
+	 *            the financialStartDate to set
+	 */
+	public void setFinancialStartDate(String financialStartDate) {
+		this.financialStartDate = financialStartDate;
+	}
+
+	/**
+	 * @return the financialStartDate
+	 */
+	public String getFinancialStartDate() {
+		return financialStartDate;
+	}
+
+	/**
+	 * @param financialNoOfMonths
+	 *            the financialNoOfMonths to set
+	 */
+	public void setFinancialNoOfMonths(int financialNoOfMonths) {
+		this.financialNoOfMonths = financialNoOfMonths;
+	}
+
+	/**
+	 * @return the financialNoOfMonths
+	 */
+	public int getFinancialNoOfMonths() {
+		return financialNoOfMonths;
+	}
+
+	/**
+	 * @param financialEndDate
+	 *            the financialEndDate to set
+	 */
+	public void setFinancialEndDate(String financialEndDate) {
+		this.financialEndDate = financialEndDate;
+	}
+
+	/**
+	 * @return the financialEndDate
+	 */
+	public String getFinancialEndDate() {
+		return financialEndDate;
+	}
+
+	/**
+	 * @param vatRate
+	 *            the vatRate to set
+	 */
+	public void setVatRate(double vatRate) {
+		this.vatRate = vatRate;
+	}
+
+	/**
+	 * @return the vatRate
+	 */
+	public double getVatRate() {
+		return vatRate;
+	}
+
+	/**
+	 * @param whtRate
+	 *            the whtRate to set
+	 */
+	public void setWhtRate(double whtRate) {
+		this.whtRate = whtRate;
+	}
+
+	/**
+	 * @return the whtRate
+	 */
+	public double getWhtRate() {
+		return whtRate;
+	}
+	
+	public double getFedwhtRate() {
+		return fedwhtRate;
+	}
+	
+	public void setFedwhtRate(double fedwhtRate) {
+		this.fedwhtRate = fedwhtRate;
+	}
+	
+    /**
+     * @return the comp_delimiter
+     */
+    public String getComp_delimiter() {
+        return comp_delimiter;
+    }
+
+    /**
+     * @param comp_delimiter the comp_delimiter to set
+     */
+    public void setComp_delimiter(String comp_delimiter) {
+        this.comp_delimiter = comp_delimiter;
+    }		
 }
