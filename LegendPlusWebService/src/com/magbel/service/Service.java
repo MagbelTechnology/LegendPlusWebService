@@ -442,6 +442,7 @@ public class Service extends ChartCreator {
 											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 											 }	
 											 
+											 System.out.println("SupplierName:  "+SupplierName);
 											 if(SupplierName.equalsIgnoreCase("")) {errorMessage = errorMessage + " Invalid Vendor : ";}
 
 											// System.out.println("assettype: "+assettype );
