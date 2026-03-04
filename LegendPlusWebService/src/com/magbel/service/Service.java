@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.naming.Context;
@@ -28,9 +29,11 @@ import com.magbel.model.AccountingDebitDetails;
 import com.magbel.model.Chart;
 import com.magbel.model.CompanyHandler;
 import com.magbel.model.FlexAccounting;
+import com.magbel.model.GroupAssetRequest;
 import com.magbel.model.NewAssetRecords;
 import com.magbel.model.NewAssetRequest;
 import com.magbel.model.Response;
+import com.magbel.model.groupAssetTransaction;
 import com.magbel.model.newAssetTransaction;
 
 @Path("/Service")
@@ -128,22 +131,14 @@ public class Service extends ChartCreator {
 							 try
 						        {  
 								 //System.out.println("Strtrantype: " + Strtrantype);
-								 java.util.ArrayList list_iso =comp.getSqlRecords();
+								// java.util.ArrayList list_iso =comp.getSqlRecords();
 							     //System.out.println("-->Iso Creation size Job 1>--> "+list_iso.size());
 							     java.util.ArrayList list = records.getNewAssetSqlRecordsForCapitalised(
 							    		 request);
-							     //System.out.println("-->size of Creation Asset in Capitalized>--> "+list.size());
+							   //  System.out.println("-->size of Creation Asset in Capitalized>--> "+list.size());
 							     //Iso Starts	
 
-							    // for(int i=0;i<list_iso.size();i++)
-							    // {
-							    //	 String finacleTransId=(String) list_iso.get(i);
-							    //	 System.out.println("-->>--> "+finacleTransId);
-							    //	 String isoValue=comp.getFinacleRecords(finacleTransId); 
-							    //	 System.out.println("-->isoValue>--> "+isoValue);
-							    //	 if(isoValue.equalsIgnoreCase("000"))
-							    //		 comp.updateSqlRecords(isoValue, finacleTransId,"");
-							    // }
+							   
 							     
 							     // Iso End
 								   //  if(list.size()>0){
@@ -162,7 +157,7 @@ public class Service extends ChartCreator {
 								    	// System.out.println("<<<<<<<<J Loop>>>>>>  "+k+"  list.size>> "+list.size() );
 								    newAssetTransaction  newassettrans = (newAssetTransaction)list.get(k);    	 
 										String integrifyId =  newassettrans.getIntegrifyId();
-										System.out.println("integrifyId: " + integrifyId);
+									//	System.out.println("integrifyId: " + integrifyId);
 										String compintegrifyId =  newassettrans.getIntegrifyId();
 										String Description = newassettrans.getDescription();
 										String RegistrationNo = newassettrans.getRegistrationNo();
@@ -172,7 +167,7 @@ public class Service extends ChartCreator {
 										String AssetModel = newassettrans.getAssetModel();
 										String AssetSerialNo = newassettrans.getAssetSerialNo();
 										String AssetEngineNo = newassettrans.getAssetEngineNo();
-										String SupplierName = newassettrans.getSupplierName();
+										String SupplierName = request.getSupplier_Name();
 										String AssetUser = newassettrans.getAssetUser();
 										String AssetMaintenance = newassettrans.getAssetMaintenance();
 										double VatableCost = newassettrans.getCostPrice();
@@ -195,8 +190,8 @@ public class Service extends ChartCreator {
 										String sbuCode = newassettrans.getSbuCode();
 										String lpo = newassettrans.getLpo();
 										String invoiceNo = newassettrans.getInvoiceNo();
-										String supervisorName = request.getSupervisor();
-										System.out.println("<<<<<supervisorName>>>>>: "+ supervisorName);
+										String supervisorName = newassettrans.getSupervisor();
+										
 										String posted = newassettrans.getposted();
 										String assetId = newassettrans.getAssetId();
 										//System.out.println("<<<<<assetId: "+ assetId);
@@ -279,11 +274,26 @@ public class Service extends ChartCreator {
 										String budgetValue = comp.findObject("SELECT BALANCE_ALLOCATION FROM AM_ACQUISITION_BUDGET WHERE BRANCH_ID = '"+branchCode+"' AND CATEGORY_CODE = '"+categoryCode+"' AND SUB_CATEGORY_CODE = '"+subcategoryCode+"' AND SBU_CODE = '"+sbuCode+"' ");
 									//	System.out.println("budgetValue >>>>>> "+budgetValue+"  noofitems: "+noofitems);
 										String budgetenfoced =comp.findObject(" SELECT enforce_acq_budget from am_gb_company ");
-										 if(supervisorName==null || supervisorName.equals("")){  
-										      assetstatus = "C"; 
-										      errorMessage = "Suppervisor Id must be provided; ";
-										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
-										 }
+										System.out.println("<<<<<supervisorName>>>>>: "+ supervisorName);
+									//	System.out.println("<<<<<supervisorName length>>>>>: "+ supervisorName.length());
+										if(supervisorName==null || supervisorName.equalsIgnoreCase("") || supervisorName.length() == 0){  
+										    assetstatus = "C"; 
+										    errorMessage = "Supervisor Id must be provided; ";
+										    
+										    JSONObject errorJson = new JSONObject();
+										    errorJson.put("asset_id", "");
+										    errorJson.put("message", errorMessage);
+										    
+										    return errorJson.toString();  
+										}
+
+
+//										if (supervisorName == null || supervisorName.trim().isEmpty() || supervisorName.equals("")) {
+//										    JSONObject error = new JSONObject();
+//										    error.put("asset_id", "");
+//										    error.put("message", "Supervisor Id must be provided");
+//										    return error.toString();
+//										}
 										
 										 if(UserName==null || UserName.equals("")){
 										      assetstatus = "C";
@@ -300,6 +310,11 @@ public class Service extends ChartCreator {
 										      errorMessage = errorMessage+"Branch Code must be provided; ";
 										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 										 }	
+										 if(AssetMake==null || AssetMake.equals("")){
+										      assetstatus = "C";
+										      errorMessage = "Asset Make must be provided; ";
+										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+										 }
 										 if(budgetenfoced.equals("Y")){
 										 if((budgetValue=="")||(budgetValue==null)){  
 										      assetstatus = "C"; 
@@ -314,45 +329,30 @@ public class Service extends ChartCreator {
 										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 										 }			 
 										 }
-										 System.out.println("supervisorName : >>>>>> " + supervisorName);
-
-										 if (supervisorName == null || supervisorName.equals("")) {
-										     supervisorName = "";
-										 }
-
-										 System.out.println("UserName 2>>>>>> " + UserName);
+										
 
 										 if (UserName != null && !UserName.equalsIgnoreCase("")) {
 										     user_confirm = comp.findObject("SELECT full_name FROM am_gb_user WHERE user_name = '" + UserName + "' AND USER_STATUS = 'ACTIVE'");
 										     UserID = comp.findObject("SELECT USER_ID FROM am_gb_user WHERE user_name = '" + UserName + "' AND USER_STATUS = 'ACTIVE'");
 										 }
 
-										 if (supervisorName != null && !supervisorName.equalsIgnoreCase("")) {
-										     supervisor = comp.findObject("SELECT USER_ID FROM am_gb_user WHERE user_id = '" + supervisorName + "' AND USER_STATUS = 'ACTIVE'");
-										 }
-
+										
 										 SupplierName = comp.findObject("SELECT Vendor_Code FROM am_ad_vendor WHERE Vendor_Code = '" + SupplierName + "'");
-										 System.out.println("supervisor 2>>>>>> " + supervisor);
+										// System.out.println("supervisor 2>>>>>> " + supervisor);
 
-										 if (supervisor == null) {
-										     supervisor = "0";
-										 }
-
-										 System.out.println("supervisor 2B>>>>>> " + supervisor);
-
-										 if ("0".equals(supervisor) || supervisor.equals("") || supervisorName.equals("") || supervisor.equals(null)) {
-											 System.out.println("supervisor 2B+>>>>>> " + supervisor);
+										 	String super_name = supervisor;
+										 
+										
+										
+										 if ("0".equals(super_name) || "".equals(super_name)) {
+											// System.out.println("approvedbyName>>>>>> " + approvedbyName + "Supervisor Id must be provided; " );
 											 assetstatus = "C"; 
-										     errorMessage = errorMessage+"Supervisor Not Found or Incorrect Supervisor; ";
+											 errorMessage = "Supervisor Id must be provided; ";
 										 }
+										// System.out.println("approvedbyName after >>>>>> " + errorMessage  );
+//										
 
-										 if (UserName == null) {
-										     UserName = "";
-										 }
-
-										 if (supervisorName != null && !supervisorName.equalsIgnoreCase("") && branch_id != null && !branch_id.equalsIgnoreCase("")) {
-										     supervisor_confirm = comp.findObject("SELECT full_name FROM am_gb_user WHERE user_Name = '" + supervisorName + "' AND IS_SUPERVISOR = 'Y' AND BRANCH = " + branch_id + " AND USER_STATUS = 'ACTIVE'");
-										 }
+										 
 
 										 double threshold = Double.parseDouble(comp.findObject("SELECT Cost_Threshold FROM am_gb_company"));
 										 int numOfTransactionLevel = comp.getNumOfTransactionLevel("27");
@@ -363,14 +363,21 @@ public class Service extends ChartCreator {
 										     approvedbyName = "Supervisor Not Found";
 										 }
 
-										 System.out.println("Supervisor by Id After: " + supervisor);
-										 System.out.println("Approved by Name: " + approvedbyName);
+										// System.out.println("Supervisor by Id After: " + supervisor);
+										 //System.out.println("Approved by Name: " + approvedbyName);
 
 										 if (approvedbyName == null || approvedbyName.equals("")) {
 											 assetstatus = "C"; 
 										     errorMessage = "Supervisor Not Found or Incorrect Supervisor; ";
 										 }
-
+										 
+										 if(supervisor.equalsIgnoreCase("")){
+										      assetstatus = "C";
+										      errorMessage = errorMessage+"Invalid Supervisor; ";
+										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+										 }	
+										 
+										// System.out.println("Final Error Message: " + errorMessage);
 //										if(supervisor.equals("0") || supervisorName.equals("0")) {
 //											errorMessage = "Supervisor Not Found; ";
 //										}
@@ -383,12 +390,12 @@ public class Service extends ChartCreator {
 									
 											// errorMessage = "";
 //											 System.out.println("======errorMessage: "+errorMessage+"     integrifyIdexist: "+integrifyIdexist);
-//											 if(!integrifyIdexist.equalsIgnoreCase("")){
+											 if(!integrifyIdexist.equalsIgnoreCase("")){
 //												 System.out.println("======errorMessage: "+errorMessage);
-//											      assetstatus = "C";
-//											      errorMessage = "Asset Already Posted; ";
+												 assetstatus = "C";
+											      errorMessage = "Asset Already Posted; ";
 //											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
-//											 }	
+											 }	
 											 if(branch_id==""){
 											      assetstatus = "C";
 											      errorMessage = errorMessage +"Invalid Branch Id; ";
@@ -399,18 +406,18 @@ public class Service extends ChartCreator {
 											      errorMessage = errorMessage+"Invalid User Name; ";
 											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 											 }				 
-											 if(Datepurchased==null){
+											 if(Datepurchased==null || Datepurchased.equals("")){
 											      assetstatus = "C";
 											      errorMessage = errorMessage+"Purchase Date Cannot be empty; ";
 											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 											 }	
 										//	 System.out.println("PostingDate:  "+PostingDate);
-											 if(PostingDate==null){
+											 if(PostingDate==null || PostingDate.equals("")){
 											      assetstatus = "C";
 											      errorMessage = errorMessage+"Posting Date Cannot be empty; ";
 											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
 											 }		
-											 if(EffectiveDate==null){
+											 if(EffectiveDate==null || EffectiveDate.equals("")){
 											      assetstatus = "C";
 											      errorMessage = errorMessage+"Effective Date Cannot be empty; ";
 											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
@@ -457,7 +464,7 @@ public class Service extends ChartCreator {
 												 System.out.println("assetexist: "+integrifyIdexist);
 											 }
 											 
-											 System.out.println("tranType: "+tranType);
+											// System.out.println("tranType: "+tranType);
 											 
 											 if(assettype.equalsIgnoreCase("U")&& errorMessage.equalsIgnoreCase("")){
 											//	 double TotalCostPrice = Double.parseDouble(comp.findObject("select sum(cost_price) from NEW_GROUP_ASSET_INTERFACE where INTEGRIFY_ID = '"+integrifyId+"' AND ASSET_TYPE = 'U'"));
@@ -538,7 +545,7 @@ public class Service extends ChartCreator {
 												 
 											// System.out.println("Posted: "+posted+"  Invoice No: "+invoiceNo+" assettype: "+assettype+"  tranType: "+tranType);
 											 if(tranType.equalsIgnoreCase("N")){
-												 System.out.println("We are here:");
+												// System.out.println("We are here:");
 //												 if(!integrifyIdexist.equalsIgnoreCase("")){					 
 //											      assetstatus = "C";
 //											      errorMessage = "Asset already Posted ";
@@ -549,6 +556,15 @@ public class Service extends ChartCreator {
 											 if(!invoiceNo.equalsIgnoreCase(null)){
 
 												 System.out.println("Table Name:  "+tablename);
+												 
+												 if (supervisorName != null && !supervisorName.equalsIgnoreCase("")) {
+												     supervisor = comp.findObject("SELECT USER_ID FROM am_gb_user WHERE user_id = '" + supervisorName + "' AND USER_STATUS = 'ACTIVE'");
+												 }
+												 
+												 if (supervisorName != null && !supervisorName.equalsIgnoreCase("") && branch_id != null && !branch_id.equalsIgnoreCase("")) {
+												     supervisor_confirm = comp.findObject("SELECT full_name FROM am_gb_user WHERE user_Name = '" + supervisorName + "' AND IS_SUPERVISOR = 'Y' AND BRANCH = " + branch_id + " AND USER_STATUS = 'ACTIVE'");
+												 }
+
 											 //assetexist = comp.findObject("SELECT ASSET_ID FROM "+tablename+" WHERE INTEGRIFY = '"+integrifyId+"'");
 									//		 System.out.println("Integriy Code Exist:  "+integrifyIdexist);
 									//		 if(assetexist.equalsIgnoreCase("")){
@@ -570,13 +586,17 @@ public class Service extends ChartCreator {
 											 if((!invoice_confirm.equalsIgnoreCase("")) && (noofitems==0)){errorMessage = errorMessage + " Invoice Number already Used ";}
 											// if((!lpo_confirm.equalsIgnoreCase("")) && (noofitems==0)){errorMessage = errorMessage + " LPO Number already Used ";}
 										//	 System.out.println("lpo_confirm>>>>>> "+lpo_confirm+"   invoice_confirm>>>>> "+invoice_confirm);
-											 System.out.println("Asset errorMessage>>>>>> "+errorMessage+" Asset Status>>>>>> "+AssetStatus);
+										//	 System.out.println("Asset errorMessage>>>>>> "+errorMessage+" Asset Status>>>>>> "+AssetStatus);
+											 System.out.println("For Individual supervisor>>>>>> "+supervisor+"  UserID: "+UserID);
+											 if(supervisor.equals("")){errorMessage = errorMessage + " Invalid Supervisor : ";}
 										if(errorMessage.equalsIgnoreCase("")){
-											System.out.println("Asset Status>>>>>> "+AssetStatus);
-											System.out.println("For Individual supervisor>>>>>> "+supervisor+"  UserID: "+UserID);
+//											System.out.println("Asset Status>>>>>> "+AssetStatus);
+											
 											if(noofitems==0){
 											String groupId = "0";
 											int postCount = 0;
+											
+											 
 											 statux = comp.insertAssetRecord(integrifyId,Description,RegistrationNo,VendorAC,Datepurchased,
 													AssetMake,AssetModel,AssetSerialNo,AssetEngineNo,SupplierName,AssetUser,AssetMaintenance,
 													CostPrice,VatableCost,AuthorizedBy,WhTax,whtaxamount,PostingDate,EffectiveDate,PurchaseReason,SubjectTOVat,AssetStatus,
@@ -586,11 +606,11 @@ public class Service extends ChartCreator {
 											 		errorMessage=""; assetstatus = "A";
 												//	comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
 													
-													System.out.println("Asset Statusx>>>>>> "+statux);
+													//System.out.println("Asset Statusx>>>>>> "+statux);
 											 if(statux == 0 )
 											 {
 												 infofld = comp.findtwoinfo("SELECT ASSET_ID, ASSET_CODE FROM "+tablename+" WHERE INTEGRIFY = '"+integrifyId+"'");
-												 System.out.println("Information fld: "+infofld);
+											//	 System.out.println("Information fld: "+infofld);
 												 String []others = infofld.split(",");
 												 assetId = others[0];
 												 assetCode = others[1];
@@ -623,6 +643,7 @@ public class Service extends ChartCreator {
 													  
 													  System.out.println("assetRaiseEntry: "+assetRaiseEntry);
 														if(assetRaiseEntry != null && assetRaiseEntry.equalsIgnoreCase("Y")){
+															 System.out.println("assetRaiseEntry B: "+assetRaiseEntry);
 													    	if(assettype.equalsIgnoreCase("C")){								
 													    		url = "DocumentHelp.jsp?np=updateAsset&amp;id="+assetId+"&pageDirect=Y";
 													    	}
@@ -631,14 +652,15 @@ public class Service extends ChartCreator {
 													    	}
 														  String flag= "";
 														  String partPay="";	
-														  
+														 
 														  String branchName= comp.findObject(" SELECT branch_name from am_ad_branch where branch_code='"+branchCode+"'");
 														  //String description= ad.getDescription();
+														  
 														  String subjectT= comp.subjectToVat(assetId);
 														  String whT= comp.whTax(assetId);
-														  System.out.println("Supervisor Name: "+approvedbyName+"  User Id: "+Integer.parseInt(supervisor));
+														 // System.out.println("Supervisor Name: "+approvedbyName+"  User Id: "+Integer.parseInt(supervisor));
 														  comp.insertApprovalx(assetId, Description, page1, flag, partPay,approvedbyName,branchName,subjectT,whT,url,lastMTID,Integer.parseInt(assetCode));
-															}
+														}
 														  if(assetRaiseEntry != null && assetRaiseEntry.equalsIgnoreCase("N")){
 															  comp.updateAssetStatusChange("update "+tablename+" set asset_status='APPROVED' where asset_id='"+assetId+"'");
 															  comp.updateAssetStatusChange("update am_asset_archive set asset_status='ACTIVE' where asset_id='"+assetId+"'");
@@ -718,6 +740,7 @@ public class Service extends ChartCreator {
 
 //												 String groupitemsNo0 = comp.findObject("SELECT count(*) FROM NEW_GROUP_ASSET_INTERFACE WHERE POSTED = 'N' AND TRAN_TYPE = 'N' AND INTEGRIFY_ID = '"+compintegrifyId+"'");
 //													 System.out.println("groupitemsNo0: "+groupitemsNo0+"   Inside Jobs2 integrifyId: "+integrifyId);
+								
 												 page1 = "ASSET GROUP CREATION RAISE ENTRY";
 												 if(groupexist.equals("")){
 													 statuk = comp.insertGroupAssetRecord(integrifyId,Description,RegistrationNo,VendorAC,Datepurchased,
@@ -817,16 +840,27 @@ public class Service extends ChartCreator {
 											    	 System.out.println("<<<<<<<<GROUP Loop>>>>>>  "+i);
 											    	newAssetTransaction  newrectrans = (newAssetTransaction)grouprec.get(i);    	 
 														String recintegrifyId =  newrectrans.getIntegrifyId();
+														// System.out.println(" recintegrifyId: "+recintegrifyId);
 														String recDescription = newrectrans.getDescription();
+														 //System.out.println(" recDescription: "+recDescription);
 														String recRegistrationNo = newrectrans.getRegistrationNo();
+														// System.out.println(" recRegistrationNo: "+recRegistrationNo);
 														String recVendorAC = newrectrans.getVendorAC();
+														// System.out.println(" recVendorAC: "+recVendorAC);
 														String recDatepurchased = newrectrans.getDatepurchased();
+														// System.out.println(" recDatepurchased: "+recDatepurchased);
 														String recAssetMake = newrectrans.getAssetMake();
+														//System.out.println(" recAssetMake: "+recAssetMake);
 														String recAssetModel = newrectrans.getAssetModel();
+														//System.out.println(" recAssetModel: "+recAssetModel);
 														String recAssetSerialNo = newrectrans.getAssetSerialNo();
+														//System.out.println(" recAssetSerialNo: "+recAssetSerialNo);
 														String recAssetEngineNo = newrectrans.getAssetEngineNo();
+														//System.out.println(" recAssetEngineNo: "+recAssetEngineNo);
 														String recSupplierName = newrectrans.getSupplierName();
+														//System.out.println(" recSupplierName: "+recSupplierName);
 														String recAssetUser = newrectrans.getAssetUser();
+														//System.out.println(" recAssetUser: "+recAssetUser);
 														String recAssetMaintenance = newrectrans.getAssetMaintenance();
 														double recVatableCost = newrectrans.getCostPrice();
 														String recAuthorizedBy = newrectrans.getAuthorizedBy();
@@ -857,7 +891,7 @@ public class Service extends ChartCreator {
 														double recwhtaxvalue = newrectrans.getWhTaxValue();
 														String rectranType = newrectrans.getTranType();
 														int recwhtaxrate = (int)whtaxvalue;
-														int recno = newrectrans.getNoofitems();	
+														int recno = request.getNoOfItem();
 														String reclocation = newassettrans.getLocation();
 														String recspare1 = newassettrans.getSpare1();
 														String recspare2 = newassettrans.getSpare2();
@@ -869,7 +903,7 @@ public class Service extends ChartCreator {
 														String recmemovalue = newassettrans.getMemovalue();
 														String recmultiple = newassettrans.getMultiple();
 														String rectranstype = "";
-														String recAssetStatus = "PENDING";
+														String recAssetStatus = "APPROVED";
 														//String recassetstatus = "";
 														String recinfofld = "";
 														String recassetexist = "";
@@ -1348,12 +1382,15 @@ public class Service extends ChartCreator {
 											// System.out.println("====List Size: "+k);
 											 k++;
 											 data.put("asset_id", assetId);
-											 data.put("message", errorMessage);
+											 data.put("message", errorMessage.toString());
 											 } finally {
 												 System.out.println(
 											                "execution complete..");
 											 }
 											 }
+											 }else {
+												 data.put("asset_id", "");
+												 data.put("message", "ThirdParty Application is not Enabled.");
 											 }
 						        }
 						        catch(Exception e) {
@@ -1365,6 +1402,1068 @@ public class Service extends ChartCreator {
 	
 	}
 	
+	@POST
+	@Path("/getGroupAssetCreationDetails")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String groupAssetCreation(List<GroupAssetRequest> requestList) throws Throwable {
+	    System.out.println("Starting to call group asset creation!!!");
+
+	    NewAssetRecords records = new NewAssetRecords();
+	    CompanyHandler comp = new CompanyHandler();
+	    JSONObject data = new JSONObject();
+	    try {
+	    ArrayList<groupAssetTransaction> list = records.getGroupAssetSqlRecords(requestList);
+		     System.out.println("-->size of Creation Asset in Capitalized>--> "+list.size());
+		     String oldintegrify = "";
+		     String ProcessingThirdPartyRecord =comp.findObject(" SELECT THIRDPARTY_REQUIRE from am_gb_company ");
+		     //System.out.println("<<<<<<ProcessingThirdPartyRecord: "+ProcessingThirdPartyRecord);
+		     String delimiter = comp.findObject("SELECT DELIMITER FROM am_ad_auto_identity ");
+		     if(ProcessingThirdPartyRecord.equalsIgnoreCase("Y")){
+		    	 // System.out.println("<<<<<<ProcessingThirdPartyRecord Is Active: "+ProcessingThirdPartyRecord); 
+		    	//  System.out.println("<<<<<<<<List Size>>>>>> "+list.size() );
+		//     for(int k=0;k<=list.size();k++)
+		    	int  k=0;
+		    String tempIntegrify = "";
+		     while (k < list.size())
+		     {
+		    	 groupAssetTransaction  newassettrans = (groupAssetTransaction)list.get(k);    	 
+					String integrifyId =  newassettrans.getIntegrifyId();
+				//	System.out.println("integrifyId: " + integrifyId);
+					String compintegrifyId =  newassettrans.getIntegrifyId();
+					String Description = newassettrans.getDescription();
+					String RegistrationNo = newassettrans.getRegistrationNo();
+					String VendorAC = newassettrans.getVendorAC();
+					String Datepurchased = newassettrans.getDatepurchased();
+					String AssetMake = newassettrans.getAssetMake();
+					String AssetModel = newassettrans.getAssetModel();
+					String AssetSerialNo = newassettrans.getAssetSerialNo();
+					String AssetEngineNo = newassettrans.getAssetEngineNo();
+					String SupplierName = newassettrans.getSupplierName();
+					String AssetUser = newassettrans.getAssetUser();
+					String AssetMaintenance = newassettrans.getAssetMaintenance();
+					double VatableCost = newassettrans.getCostPrice();
+					String AuthorizedBy = newassettrans.getAuthorizedBy();
+					String WhTax = newassettrans.getWhTax();
+					String PostingDate = newassettrans.getPostingDate();
+					String EffectiveDate = newassettrans.getEffectiveDate();
+					String PurchaseReason = newassettrans.getPurchaseReason();
+					String SubjectTOVat = newassettrans.getSubjectTOVat();
+					//String AssetStatus = newassettrans.getAssetStatus();
+					String State = newassettrans.getState();
+					String Driver = newassettrans.getDriver();
+					String UserName = newassettrans.getUserID();
+					String branchCode = newassettrans.getBranchCode();
+					String sectionCode = newassettrans.getSectionCode();
+					String deptCode = newassettrans.getDeptCode();
+					String categoryCode = newassettrans.getCategoryCode();
+					String subcategoryCode = newassettrans.getSubcategoryCode();
+					String barCode = newassettrans.getBarCode();
+					String sbuCode = newassettrans.getSbuCode();
+					String lpo = newassettrans.getLpo();
+					String invoiceNo = newassettrans.getInvoiceNo();
+					String supervisorName = newassettrans.getSupervisor();
+					
+					String posted = newassettrans.getposted();
+					String assetId = newassettrans.getAssetId();
+					//System.out.println("<<<<<assetId: "+ assetId);
+					String assetCode = newassettrans.getAssetCode();
+					String errormessage = newassettrans.getErrormessage();
+					String assettype = newassettrans.getAssetType();
+					double whtaxvalue = newassettrans.getWhTaxValue();
+					double vatvalue = newassettrans.getVatValue();
+					String tranType = newassettrans.getTranType();
+					int whtaxrate = (int)whtaxvalue;
+					int noofitems = newassettrans.getNoofitems();
+					String systemIp = newassettrans.getSystemIp();
+					String location = newassettrans.getLocation();
+					String spare1 = newassettrans.getSpare1();
+					String spare2 = newassettrans.getSpare2();
+					String spare3 = newassettrans.getSpare3();
+					String spare4 = newassettrans.getSpare4();
+					String spare5 = newassettrans.getSpare5();
+					String spare6 = newassettrans.getSpare6();
+					String memo = newassettrans.getMemo();
+					String memovalue = newassettrans.getMemovalue();
+					String multiple = newassettrans.getMultiple();
+					int usefullife = newassettrans.getUsefullife();
+					String projectCode = newassettrans.getProjectCode();
+//					String location = newassettrans.getLocation();
+					if(multiple==null){multiple="N";}
+//					boolean tempdone = comp.newassetinterface(integrifyId,"P");
+				//	String groupitemsNo = comp.findObject("SELECT count(*) FROM NEW_GROUP_ASSET_INTERFACE WHERE POSTED = 'N' AND TRAN_TYPE = 'N' AND INTEGRIFY_ID = '"+integrifyId+"'");
+					//int recpend = Integer.parseInt(groupitemsNo);
+				System.out.println("integrifyId>>>>>> "+integrifyId+"  noofitems:  "+noofitems+" oldintegrify: "+oldintegrify);
+					String errorMessage = "";
+					String tablename = "";
+					String transtype = "";
+					String AssetStatus = "PENDING";
+					String assetstatus = "";
+					String infofld = "";
+					//String assetexist = "";
+					String integrifyIdexist = "";
+					String approvalassetexist = "";
+					double CostPrice = VatableCost;
+					double whtaxamount = 0.00;
+					double vatamount = 0.00;   
+					String fromRepost = "N";
+					String page1 = "ASSET CREATION RAISE ENTRY";
+					String subjectr ="Asset Creation Approval";
+					String url = "";
+					 String groupid = "";
+					 int statux = 1;
+					 String supervisor_confirm = "";
+					 String user_confirm = "";
+					 String UserID = "";
+					 String supervisor = newassettrans.getSupervisor();
+					 double vatrate = 0.0;
+					 String approvedbyName = "";
+					 String groupexist = "";
+					 String statuk = "";
+				      String groupAssetId = "";
+				      assetstatus = "P";
+				      boolean donetemp = false;
+				      try {
+							// String branch_id = "";
+//							 System.out.println("User Name>>>>>> "+UserName); 
+							//errorMessage=""; assetstatus = "P";
+							//comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+							 integrifyIdexist = comp.findObject("SELECT INTEGRIFY FROM AM_ASSET WHERE INTEGRIFY = '"+integrifyId+"'");
+							// System.out.println("Integrify Id Before Looping: "+integrifyIdexist+" User Name: "+UserName );
+							 //String groupitemsNo = comp.findObject("SELECT count(*) FROM NEW_GROUP_ASSET_INTERFACE WHERE POSTED = 'N' AND TRAN_TYPE = 'N' AND INTEGRIFY_ID = '"+compintegrifyId+"'");
+							 String groupitemsNo = String.valueOf(noofitems);
+							 System.out.println("groupitemsNo>>>>>> "+groupitemsNo); 
+							 groupitemsNo =  groupitemsNo.equals(null) || groupitemsNo.equals("") ? "0" : groupitemsNo;
+							 System.out.println("Group Item Number>>>>>> "+groupitemsNo+"  compintegrifyId: "+compintegrifyId);
+							String assetRaiseEntry =comp.findObject(" SELECT raise_entry from am_gb_company ");
+							String branch_id = comp.findObject("SELECT BRANCH_ID FROM am_ad_branch WHERE BRANCH_CODE = '"+branchCode+"' ");
+							String budgetValue = comp.findObject("SELECT BALANCE_ALLOCATION FROM AM_ACQUISITION_BUDGET WHERE BRANCH_ID = '"+branchCode+"' AND CATEGORY_CODE = '"+categoryCode+"' AND SUB_CATEGORY_CODE = '"+subcategoryCode+"' AND SBU_CODE = '"+sbuCode+"' ");
+						//	System.out.println("budgetValue >>>>>> "+budgetValue+"  noofitems: "+noofitems);
+							String budgetenfoced =comp.findObject(" SELECT enforce_acq_budget from am_gb_company ");
+						//	System.out.println("<<<<<supervisorName>>>>>: "+ supervisorName);
+						//	System.out.println("<<<<<supervisorName length>>>>>: "+ supervisorName.length());
+							if(supervisorName==null || supervisorName.equalsIgnoreCase("") || supervisorName.length() == 0){  
+							    assetstatus = "C"; 
+							    errorMessage = "Supervisor Id must be provided; ";
+							    
+							    JSONObject errorJson = new JSONObject();
+							    errorJson.put("asset_id", "");
+							    errorJson.put("message", errorMessage);
+							    
+							    return errorJson.toString();  
+							}
+
+
+//							if (supervisorName == null || supervisorName.trim().isEmpty() || supervisorName.equals("")) {
+//							    JSONObject error = new JSONObject();
+//							    error.put("asset_id", "");
+//							    error.put("message", "Supervisor Id must be provided");
+//							    return error.toString();
+//							}
+							
+							 if(UserName==null || UserName.equals("")){
+							      assetstatus = "C";
+							      errorMessage = "User Id must be provided; ";
+							      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+							 }
+							 if(Description==null || Description.equals("")){
+							      assetstatus = "C";  
+							      errorMessage = errorMessage+"Description must be provided; ";
+							      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+							 }	
+							 if(branch_id==null || branch_id.equals("")){
+							      assetstatus = "C";
+							      errorMessage = errorMessage+"Branch Code must be provided; ";
+							      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+							 }	
+							 if(AssetMake==null || AssetMake.equals("")){
+							      assetstatus = "C";
+							      errorMessage = "Asset Make must be provided; ";
+							      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+							 }
+							 if(budgetenfoced.equals("Y")){
+							 if((budgetValue=="")||(budgetValue==null)){  
+							      assetstatus = "C"; 
+							      errorMessage = errorMessage+"No Budget for this Asset; ";
+							      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+							 }	
+							 }
+							 if(budgetenfoced.equals("Y")||(budgetValue!="")){
+							 if(CostPrice > Double.parseDouble(budgetValue)){
+							      assetstatus = "C";
+							      errorMessage = "Addition of Asset will over shoot quarterly budget for this category and you are not allowed to do so. Please exit and seek supplementary budgetary Allocation; ";
+							      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+							 }			 
+							 }
+							
+
+							 if (UserName != null && !UserName.equalsIgnoreCase("")) {
+							     user_confirm = comp.findObject("SELECT full_name FROM am_gb_user WHERE user_name = '" + UserName + "' AND USER_STATUS = 'ACTIVE'");
+							     UserID = comp.findObject("SELECT USER_ID FROM am_gb_user WHERE user_name = '" + UserName + "' AND USER_STATUS = 'ACTIVE'");
+							 }
+
+							
+							 SupplierName = comp.findObject("SELECT Vendor_Code FROM am_ad_vendor WHERE Vendor_Code = '" + SupplierName + "'");
+							// System.out.println("supervisor 2>>>>>> " + supervisor);
+
+							 	String super_name = supervisor;
+							 
+							
+							
+							 if ("0".equals(super_name) || "".equals(super_name)) {
+								// System.out.println("approvedbyName>>>>>> " + approvedbyName + "Supervisor Id must be provided; " );
+								 assetstatus = "C"; 
+								 errorMessage = "Supervisor Id must be provided; ";
+							 }
+							// System.out.println("approvedbyName after >>>>>> " + errorMessage  );
+//							
+
+							 
+
+							 double threshold = Double.parseDouble(comp.findObject("SELECT Cost_Threshold FROM am_gb_company"));
+							 int numOfTransactionLevel = comp.getNumOfTransactionLevel("27");
+
+							 if (!"0".equals(supervisor)) {
+							     approvedbyName = comp.findObject("SELECT full_name FROM am_gb_user WHERE user_id = " + Integer.parseInt(supervisor));
+							 } else {
+							     approvedbyName = "Supervisor Not Found";
+							 }
+
+							// System.out.println("Supervisor by Id After: " + supervisor);
+							 //System.out.println("Approved by Name: " + approvedbyName);
+
+							 if (approvedbyName == null || approvedbyName.equals("")) {
+								 assetstatus = "C"; 
+							     errorMessage = "Supervisor Not Found or Incorrect Supervisor; ";
+							 }
+							 
+							 if(supervisor.equalsIgnoreCase("")){
+							      assetstatus = "C";
+							      errorMessage = errorMessage+"Invalid Supervisor; ";
+							      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+							 }	
+							 
+							// System.out.println("Final Error Message: " + errorMessage);
+//							if(supervisor.equals("0") || supervisorName.equals("0")) {
+//								errorMessage = "Supervisor Not Found; ";
+//							}
+//							 if(!integrifyIdexist.equalsIgnoreCase("")){
+//								 System.out.println("======errorMessage: "+errorMessage);
+//							      assetstatus = "C";
+//							      errorMessage = "Asset Already Posted; ";
+//							      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+//							 }
+						
+								// errorMessage = "";
+//								 System.out.println("======errorMessage: "+errorMessage+"     integrifyIdexist: "+integrifyIdexist);
+								 if(!integrifyIdexist.equalsIgnoreCase("")){
+//									 System.out.println("======errorMessage: "+errorMessage);
+									 assetstatus = "C";
+								      errorMessage = "Asset Already Posted; ";
+//								      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+								 }	
+								 if(branch_id==""){
+								      assetstatus = "C";
+								      errorMessage = errorMessage +"Invalid Branch Id; ";
+								      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+								 }				 
+								 if(user_confirm.equalsIgnoreCase("")){
+								      assetstatus = "C";
+								      errorMessage = errorMessage+"Invalid User Name; ";
+								      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+								 }				 
+								 if(Datepurchased==null || Datepurchased.equals("")){
+								      assetstatus = "C";
+								      errorMessage = errorMessage+"Purchase Date Cannot be empty; ";
+								      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+								 }	
+							//	 System.out.println("PostingDate:  "+PostingDate);
+								 if(PostingDate==null || PostingDate.equals("")){
+								      assetstatus = "C";
+								      errorMessage = errorMessage+"Posting Date Cannot be empty; ";
+								      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+								 }		
+								 if(EffectiveDate==null || EffectiveDate.equals("")){
+								      assetstatus = "C";
+								      errorMessage = errorMessage+"Effective Date Cannot be empty; ";
+								      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+								 }					 
+								 if(numOfTransactionLevel!=0){
+								 if(supervisor_confirm.equalsIgnoreCase("")){
+								      assetstatus = "C";
+								      errorMessage = errorMessage+"Invalid Supervisor; ";
+								      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+								 }	
+								 }
+								// System.out.println("WhTax:  "+WhTax+"   SubjectTOVat: "+SubjectTOVat);
+								 if((!WhTax.equalsIgnoreCase("S")) && (!WhTax.equalsIgnoreCase("F")) && (!WhTax.equalsIgnoreCase("N"))){
+								      assetstatus = "C";
+								      errorMessage = errorMessage+"Invalid Withholding Tax Parameter; ";
+								      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+								 }					 
+								 //if((!SubjectTOVat.equalsIgnoreCase("Y")) && (!SubjectTOVat.equalsIgnoreCase("N"))){
+								 if((!SubjectTOVat.equalsIgnoreCase("Y")) && (!SubjectTOVat.equalsIgnoreCase("N"))){				 
+								      assetstatus = "C";
+								      errorMessage = errorMessage+"Invalid Vat Parameter It Must be Y OR N; ";
+								      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+								 }	
+								 
+								 if(SupplierName.equalsIgnoreCase("")) {errorMessage = errorMessage + " Invalid Vendor : ";}
+
+								// System.out.println("assettype: "+assettype );
+								// System.out.println(" error message after assettype: "+errorMessage );
+								 //integrifyIdexist = comp.findObject("SELECT INTEGRIFY_ID FROM Am_Invoice_no WHERE INTEGRIFY_ID = '"+integrifyId+"'");
+						//		 System.out.println(".:  "+integrifyIdexist);
+								 if(assettype.equalsIgnoreCase("C") && errorMessage.equalsIgnoreCase("")){
+									// System.out.println("Capitalised CostPrice: "+CostPrice+"  treshhold: "+treshhold);
+									 double cost_price = VatableCost + VatableCost*(vatvalue/100);
+									// System.out.println("Capitalised cost_price: "+cost_price+"  VatableCost: "+VatableCost+"  whtaxrate: "+whtaxrate);
+									 if(cost_price < threshold+0.01){
+									      assetstatus = "C";
+									      errorMessage = errorMessage +"This Asset cannot be Capitalised; ";
+									  //    System.out.println(" error message inside asset type C "+errorMessage );
+									      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+									 }
+									// assetexist = comp.findObject("SELECT ASSET_ID FROM AM_ASSET WHERE INTEGRIFY = '"+integrifyId+"' AND GROUP_ID = "+noofitems+"");
+									 tablename = "AM_ASSET";
+									 transtype = "Asset Creation";
+									 System.out.println("assetexist: "+integrifyIdexist);
+								 }
+								 
+								// System.out.println("tranType: "+tranType);
+								 
+								 if(assettype.equalsIgnoreCase("U")&& errorMessage.equalsIgnoreCase("")){
+								//	 double TotalCostPrice = Double.parseDouble(comp.findObject("select sum(cost_price) from NEW_GROUP_ASSET_INTERFACE where INTEGRIFY_ID = '"+integrifyId+"' AND ASSET_TYPE = 'U'"));
+									 //assetexist = comp.findObject("SELECT ASSET_ID FROM AM_ASSET_UNCAPITALIZED WHERE INTEGRIFY = '"+integrifyId+"' AND GROUP_ID = "+noofitems+"");
+									 tablename = "AM_ASSET_UNCAPITALIZED";
+									 transtype = "Asset Creation Uncapitalized";
+								 }	
+								 
+								 if(assettype.equalsIgnoreCase("C")&& errorMessage.equalsIgnoreCase("") && (noofitems!=0)){
+									// System.out.println(" error message inside asset type C and no of items not equals zero: "+errorMessage );
+									 //String costPrice = comp.findObject("select sum(cost_price) from NEW_GROUP_ASSET_INTERFACE where INTEGRIFY_ID = '"+integrifyId+"' AND ASSET_TYPE = 'C'");
+									// System.out.println(" strCostPrice: "+strCostPrice );
+									 String costPrice = String.valueOf(requestList.get(0).getTotal_CostPrice());
+									// System.out.println(" costPrice: "+costPrice );
+									 if(costPrice==null){costPrice="0.00";}
+									// System.out.println("Total Cost Price: "+Double.parseDouble(comp.findObject("select sum(cost_price) from NEW_GROUP_ASSET_INTERFACE where INTEGRIFY_ID = '"+integrifyId+"' AND ASSET_TYPE = 'C'")));
+									// double TotalCostPrice = Double.parseDouble(costPrice);
+								// System.out.println("Capitalised TotalCostPrice: "+TotalCostPrice+"  treshhold: "+treshhold+"  CostPrice: "+CostPrice);
+									 System.out.println("TotalCostPrice: "+requestList.get(0).getTotal_CostPrice()+"  CostPrice: "+CostPrice);
+									 if(requestList.get(0).getTotal_CostPrice() != CostPrice){
+									      assetstatus = "C";
+									      errorMessage = errorMessage +"Summary and Detail Total not Equal; ";
+									      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+									 }
+								 }	
+								 
+								// System.out.println(" error message after asset type C "+errorMessage );
+								 
+								 if(assettype.equalsIgnoreCase("U")&& errorMessage.equalsIgnoreCase("") && (noofitems!=0)){
+									 String costPrice = comp.findObject("select sum(cost_price) from NEW_GROUP_ASSET_INTERFACE where INTEGRIFY_ID = '"+integrifyId+"' AND ASSET_TYPE = 'U'"); 
+									 if(costPrice==null){costPrice="0.00";}
+									// double TotalCostPrice = Double.parseDouble(costPrice);
+							//		 System.out.println("UnCapitalised TotalCostPrice: "+TotalCostPrice+"  treshhold: "+treshhold);
+									 System.out.println("TotalCostPrice: "+requestList.get(0).getTotal_CostPrice()+"  CostPrice: "+CostPrice);
+									 if(requestList.get(0).getTotal_CostPrice() != CostPrice){
+									      assetstatus = "C";
+									      errorMessage = errorMessage +"Summary and Detail Total not Equal; ";
+									      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);						 
+									 }
+								 }	
+								 
+								 if(tranType.equalsIgnoreCase("I") && errorMessage.equalsIgnoreCase("")){
+									 //assetexist = comp.findObject("SELECT ASSET_ID FROM am_asset_improvement WHERE INTEGRIFY = '"+integrifyId+"'");
+									// tablename = "AM_ASSET_UNCAPITALIZED";
+									// transtype = "Asset Creation Uncapitalized";
+								 }	
+								 String residualvalue =comp.findObject(" SELECT residual_value from am_gb_company ");
+							//	 System.out.println("residualvalue:  "+residualvalue);
+								 // System.out.println("SubjectTOVat:  "+SubjectTOVat);
+				/*				 if(SubjectTOVat.equalsIgnoreCase("Y")){
+									 String vatvalue =comp.findObject(" SELECT vat_rate from am_gb_company ");
+									 vatrate = Double.parseDouble(vatvalue)/100; 
+								//	 System.out.println("vatvalue:  "+vatvalue+"  vatrate: "+vatrate);
+									 vatamount = VatableCost*vatrate;
+									 CostPrice = VatableCost + (VatableCost*vatrate);
+								//	 System.out.println("CostPrice:  "+CostPrice+" vatamount:"+vatamount);
+								 }*/
+								 if((!SubjectTOVat.equalsIgnoreCase(null)) && (!SubjectTOVat.equalsIgnoreCase("")) && (SubjectTOVat.equalsIgnoreCase("Y"))){				
+									 vatrate =  vatvalue/100;
+									 vatamount = VatableCost*vatrate;
+									 CostPrice = VatableCost + (VatableCost*vatrate);
+								//	 System.out.println("whtaxamount:  "+whtaxamount);
+								 }					 
+								// System.out.println("WhTax:  "+WhTax);
+								 if((!WhTax.equalsIgnoreCase(null)) && (!WhTax.equalsIgnoreCase(""))  && (!WhTax.equalsIgnoreCase("N"))){				
+									 whtaxamount =  VatableCost*(whtaxvalue/100);
+						//			 System.out.println("whtaxamount:  "+whtaxamount);
+								 }		
+								// System.out.println("errorMessage Before Processing: "+errorMessage);
+								 if(errorMessage.equalsIgnoreCase("")){
+						//		 System.out.println("assetexist Before Processing: "+integrifyIdexist+"  oldintegrify: "+oldintegrify+"  integrifyId: "+integrifyId);
+								 //if((!assetexist.equalsIgnoreCase("")) && (oldintegrify==integrifyId)){
+//									 if(!integrifyIdexist.equalsIgnoreCase("")){					 
+//								      assetstatus = "C";
+//								      errorMessage = "Asset already Posted ";
+//								      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+//							//	      System.out.println("Record Not Successfully Updated because assetexist 2>>> "+integrifyIdexist+" errorMessage: "+errorMessage);
+//								 }
+//								      else{
+									 
+								// System.out.println("Posted: "+posted+"  Invoice No: "+invoiceNo+" assettype: "+assettype+"  tranType: "+tranType);
+								 if(tranType.equalsIgnoreCase("N")){
+									// System.out.println("We are here:");
+//									 if(!integrifyIdexist.equalsIgnoreCase("")){					 
+//								      assetstatus = "C";
+//								      errorMessage = "Asset already Posted ";
+//								      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+//								      System.out.println("Record Not Successfully Updated because assetexist >>>> "+integrifyIdexist+" errorMessage: "+errorMessage);
+//								 }else{
+//									 
+								 if(!invoiceNo.equalsIgnoreCase(null)){
+
+									 System.out.println("Table Name:  "+tablename);
+									 
+									 if (supervisorName != null && !supervisorName.equalsIgnoreCase("")) {
+									     supervisor = comp.findObject("SELECT USER_ID FROM am_gb_user WHERE user_id = '" + supervisorName + "' AND USER_STATUS = 'ACTIVE'");
+									 }
+									 
+									 if (supervisorName != null && !supervisorName.equalsIgnoreCase("") && branch_id != null && !branch_id.equalsIgnoreCase("")) {
+									     supervisor_confirm = comp.findObject("SELECT full_name FROM am_gb_user WHERE user_Name = '" + supervisorName + "' AND IS_SUPERVISOR = 'Y' AND BRANCH = " + branch_id + " AND USER_STATUS = 'ACTIVE'");
+									 }
+
+								 //assetexist = comp.findObject("SELECT ASSET_ID FROM "+tablename+" WHERE INTEGRIFY = '"+integrifyId+"'");
+						//		 System.out.println("Integriy Code Exist:  "+integrifyIdexist);
+						//		 if(assetexist.equalsIgnoreCase("")){
+								// String branch_id = comp.findObject("SELECT BRANCH_ID FROM am_ad_branch WHERE BRANCH_CODE = '"+branchCode+"'");
+								 String section_id = comp.findObject("SELECT SECTION_ID FROM am_ad_section WHERE SECTION_CODE = '"+sectionCode+"'");
+								 String dept_id = comp.findObject("SELECT DEPT_ID FROM am_ad_department WHERE DEPT_CODE = '"+deptCode+"'");
+								 String cat_id = comp.findObject("SELECT CATEGORY_ID FROM am_ad_category WHERE CATEGORY_CODE = '"+categoryCode+"'");
+								 String sub_cat_id = comp.findObject("SELECT SUB_CATEGORY_ID FROM AM_AD_SUB_CATEGORY WHERE SUB_CATEGORY_CODE = '"+subcategoryCode+"'");
+								 String invoice_confirm = comp.findObject("SELECT *FROM AM_INVOICE_NO WHERE INVOICE_NO = '"+invoiceNo+"'");
+								
+								// String lpo_confirm = comp.findObject("SELECT *FROM AM_INVOICE_NO WHERE LPO = '"+lpo+"'");
+								 System.out.println("branch_confirm>>>>>> "+invoice_confirm+"  section_confirm:  "+section_id+" dept_confirm: "+dept_id
+										 +" cat_confirm: "+cat_id+" invoice_confirm: "+invoice_confirm);
+								 if(branch_id.equalsIgnoreCase("")){errorMessage = errorMessage + " Invalid Branch : ";}
+								 if(section_id.equalsIgnoreCase("")){errorMessage = errorMessage + " Invalid Section : ";}
+								 if(dept_id.equalsIgnoreCase("")){errorMessage = errorMessage + " Invalid Department : ";}
+								 if(cat_id.equalsIgnoreCase("")){errorMessage = errorMessage + " Invalid Category : ";}
+								// if(!lpo_confirm.equalsIgnoreCase("")){errorMessage = errorMessage + "LPO Number Already Used : ";}
+								 if((!invoice_confirm.equalsIgnoreCase("")) && (noofitems==0)){errorMessage = errorMessage + " Invoice Number already Used ";}
+								// if((!lpo_confirm.equalsIgnoreCase("")) && (noofitems==0)){errorMessage = errorMessage + " LPO Number already Used ";}
+							//	 System.out.println("lpo_confirm>>>>>> "+lpo_confirm+"   invoice_confirm>>>>> "+invoice_confirm);
+							//	 System.out.println("Asset errorMessage>>>>>> "+errorMessage+" Asset Status>>>>>> "+AssetStatus);
+							if(errorMessage.equalsIgnoreCase("")){
+//								System.out.println("Asset Status>>>>>> "+AssetStatus);
+								System.out.println("For Individual supervisor>>>>>> "+supervisor+"  UserID: "+UserID);
+								if(noofitems==0){
+								String groupId = "0";
+								int postCount = 0;
+								
+								 
+								 statux = comp.insertAssetRecord(integrifyId,Description,RegistrationNo,VendorAC,Datepurchased,
+										AssetMake,AssetModel,AssetSerialNo,AssetEngineNo,SupplierName,AssetUser,AssetMaintenance,
+										CostPrice,VatableCost,AuthorizedBy,WhTax,whtaxamount,PostingDate,EffectiveDate,PurchaseReason,SubjectTOVat,AssetStatus,
+										State,Driver,UserID,branchCode,sectionCode,deptCode,categoryCode,subcategoryCode,barCode,sbuCode,lpo,invoiceNo,
+										supervisor,posted,assetId,assetCode,assettype,branch_id,dept_id,section_id,cat_id,sub_cat_id,vatamount,residualvalue,whtaxrate,
+										location,memovalue,memo,spare1,spare2,spare3,spare4,spare5,spare6,multiple,projectCode,groupId,delimiter);
+								 		errorMessage=""; assetstatus = "A";
+									//	comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+										
+										//System.out.println("Asset Statusx>>>>>> "+statux);
+								 if(statux == 0 )
+								 {
+									 infofld = comp.findtwoinfo("SELECT ASSET_ID, ASSET_CODE FROM "+tablename+" WHERE INTEGRIFY = '"+integrifyId+"'");
+								//	 System.out.println("Information fld: "+infofld);
+									 String []others = infofld.split(",");
+									 assetId = others[0];
+									 assetCode = others[1];
+									 String msgText11 ="Asset with ID: "+ assetId +" is waiting for your approval.";	
+								 System.out.println("ASSET ID: "+assetId+"  Statux:  "+statux+" assetCode: "+assetCode+" LPO: "+lpo+" invoiceNo: "+invoiceNo+" Trans Type: "+transtype);
+								 comp.insToAm_Invoice_No(assetId, lpo, invoiceNo, transtype,integrifyId);
+								 
+							//	if(!assetId.equalsIgnoreCase("")){errorMessage="Successfully Posted"; assetstatus = "Y";
+									//		  comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+										//	  System.out.println("Record Successfully Updated 1>>> ");
+							//				 }
+							
+								  if(numOfTransactionLevel == 0)
+									 // System.out.println("numOfTransactionLevel: "+numOfTransactionLevel);
+									  
+								  {
+									  if(comp.updateNewAssetStatux(assetId, tablename))
+									  {
+										
+										  if(postCount==0){
+										 // System.out.println("======postCount: "+postCount);
+										  comp.setPendingTrans(comp.setApprovalData(assetId,assettype),"27",Integer.parseInt(assetCode));
+									
+										  String lastMTID = comp.getCurrentMtid("am_asset_approval");
+
+										//  String currentMtid= comp.findObject(" SELECT branch_name from am_asset_approval where branch_code='"+branchCode+"'");
+										  comp.setPendingTransArchive(comp.setApprovalData(assetId,assettype),"27",Integer.parseInt(lastMTID),Integer.parseInt(assetCode));
+
+										  boolean b = comp.updateNewApprovalAssetStatus(assetId,Integer.parseInt(UserID));
+										  
+										  System.out.println("assetRaiseEntry: "+assetRaiseEntry);
+											if(assetRaiseEntry != null && assetRaiseEntry.equalsIgnoreCase("Y")){
+												 System.out.println("assetRaiseEntry B: "+assetRaiseEntry);
+										    	if(assettype.equalsIgnoreCase("C")){								
+										    		url = "DocumentHelp.jsp?np=updateAsset&amp;id="+assetId+"&pageDirect=Y";
+										    	}
+										    	if(assettype.equalsIgnoreCase("U")){						    	
+										    		url = "DocumentHelp.jsp?np=updateAssetBranch&amp;id="+assetId+"&pageDirect=Y";
+										    	}
+											  String flag= "";
+											  String partPay="";	
+											 
+											  String branchName= comp.findObject(" SELECT branch_name from am_ad_branch where branch_code='"+branchCode+"'");
+											  //String description= ad.getDescription();
+											  
+											  String subjectT= comp.subjectToVat(assetId);
+											  String whT= comp.whTax(assetId);
+											 // System.out.println("Supervisor Name: "+approvedbyName+"  User Id: "+Integer.parseInt(supervisor));
+											  comp.insertApprovalx(assetId, Description, page1, flag, partPay,approvedbyName,branchName,subjectT,whT,url,lastMTID,Integer.parseInt(assetCode));
+											}
+											  if(assetRaiseEntry != null && assetRaiseEntry.equalsIgnoreCase("N")){
+												  comp.updateAssetStatusChange("update "+tablename+" set asset_status='APPROVED' where asset_id='"+assetId+"'");
+												  comp.updateAssetStatusChange("update am_asset_archive set asset_status='ACTIVE' where asset_id='"+assetId+"'");
+												  comp.updateAssetStatusChange("update am_asset_approval set process_status='A', asset_status='ACTIVE' where asset_id='"+assetId+"'");
+												  comp.updateAssetStatusChange("update am_asset_approval_archive set process_status='A', asset_status='ACTIVE'where asset_id='"+assetId+"'");
+												  }
+												
+												  comp.updateRaiseEntry(assetId);	
+												  
+													String[] mailSetUp = comp.getEmailStatusAndName("asset creation");
+													String Status1 = mailSetUp[0];
+													String mail_code = mailSetUp[1];
+							//						System.out.println("#mail_code: "+mail_code);
+													Status1 = Status1.trim();
+													if(Status1.equalsIgnoreCase("Approved"))
+													{ 
+												  
+													String transaction_type="Asset Creation";
+													String subject ="Asset Creation";
+													
+													//Codes message= new Codes();
+																						
+													String to = comp.MailTo(mail_code, transaction_type);  //retrieves recipients from database
+
+													String msgText1 =comp.MailMessage(mail_code, transaction_type);//"New asset with ID: "+id +" was successfully created.";
+//													System.out.println("#$$$$$$$$$$$ "+to);
+													comp.sendMail(to,subject,msgText1);	
+													}
+													errorMessage=" Successfully Posted "; assetstatus = "Y";
+													//comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+													postCount = postCount + 1;
+													System.out.println("ASSET Successfully Posted>>> ");
+									  }
+									  }
+								  }
+								  }
+								  else{	
+									  System.out.println("Asset Code Outside updateNewAssetStatux: "+assetCode+"  assetId: "+assetId);
+									  approvalassetexist = comp.findObject("SELECT ASSET_ID FROM am_asset_approval WHERE ASSET_ID = '"+assetId+"'");
+									  if(approvalassetexist.equalsIgnoreCase("")){
+									  comp.setPendingTrans(comp.setApprovalData(assetId,assettype),"27",Integer.parseInt(assetCode));
+									  }
+									  String lastMTID = comp.getCurrentMtid("am_asset_approval");
+						//			  System.out.println("lastMTID: "+lastMTID);
+									  comp.setPendingTransArchive(comp.setApprovalData(assetId,assettype),"27",Integer.parseInt(lastMTID),Integer.parseInt(assetCode));
+										subjectr ="Asset Creation Approval";
+										String msgText11 ="Asset with ID: "+ assetId +" is waiting for your approval.";
+										comp.sendMailSupervisor(supervisor, subjectr, msgText11);
+										if(noofitems==0){assetstatus = "Y";
+										}else{assetstatus = "N";}
+										errorMessage=" Asset creation submitted for approval "; 
+									//	comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+
+								  }	
+							}	
+								else{
+									 System.out.println("Before Processing statuk for Group Asset : " + statuk);
+								 //if(statuk==0){
+									if(assettype.equalsIgnoreCase("C")){ 	
+									 groupexist = comp.findObject("SELECT DISTINCT INTEGRIFY FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");
+									}
+//									if(assettype.equalsIgnoreCase("U")){ 	
+//										 groupexist = comp.findObject("SELECT DISTINCT INTEGRIFY FROM AM_GROUP_ASSET_UNCAPITALIZED WHERE INTEGRIFY = '"+integrifyId+"'");
+//										}
+									 String lastMTID = "";
+				/*					String validateapproval = comp.findObject("SELECT asset_code FROM am_asset_approval WHERE ASSET_CODE = '"+integrifyId+"'");
+									System.out.println("Jobs2 validateapproval: "+validateapproval);
+									if(validateapproval.equalsIgnoreCase("")){
+										System.out.println("Inside Jobs2 integrifyId: "+integrifyId);
+									  comp.setPendingTrans(comp.setApprovalData(assetId,assettype),"27",Integer.parseInt(integrifyId));
+									   lastMTID = comp.getCurrentMtid("am_asset_approval");
+									  comp.setPendingTransArchive(comp.setApprovalData(assetId,assettype),"27",Integer.parseInt(lastMTID),Integer.parseInt(integrifyId));
+									  boolean b = comp.updateNewApprovalAssetStatus(assetId,Integer.parseInt(UserID));
+								}*/
+//									 System.out.println("groupexist for Group Asset : " + groupexist);
+									 String branchName= comp.findObject(" SELECT branch_name from am_ad_branch where branch_code='"+branchCode+"'"); 
+
+//									 String groupitemsNo0 = comp.findObject("SELECT count(*) FROM NEW_GROUP_ASSET_INTERFACE WHERE POSTED = 'N' AND TRAN_TYPE = 'N' AND INTEGRIFY_ID = '"+compintegrifyId+"'");
+//										 System.out.println("groupitemsNo0: "+groupitemsNo0+"   Inside Jobs2 integrifyId: "+integrifyId);
+					
+									 page1 = "ASSET GROUP CREATION RAISE ENTRY";
+									 if(groupexist.equals("")){
+										 statuk = comp.insertGroupAssetRecord(integrifyId,Description,RegistrationNo,VendorAC,Datepurchased,
+											AssetMake,AssetModel,AssetSerialNo,AssetEngineNo,SupplierName,AssetUser,AssetMaintenance,
+											CostPrice,VatableCost,AuthorizedBy,WhTax,whtaxamount,PostingDate,EffectiveDate,PurchaseReason,SubjectTOVat,AssetStatus,
+											State,Driver,UserID,branchCode,sectionCode,deptCode,categoryCode,subcategoryCode,barCode,sbuCode,lpo,invoiceNo,
+											supervisor,posted,assetId,assetCode,assettype,branch_id,dept_id,section_id,cat_id,sub_cat_id,vatamount,residualvalue,whtaxrate,noofitems,
+											location,memovalue,memo,spare1,spare2,spare3,spare4,spare5,spare6,multiple,page1, approvedbyName,branchName);
+									 assetId = statuk;
+									 groupAssetId = statuk;
+									 System.out.println("groupAssetId for Group Asset First : " + groupAssetId+"   statuk: "+statuk);
+									 if(!groupAssetId.equals("")){
+								      assetstatus = "Y";
+								      errorMessage = " Successfully Posted ";
+								      if(assetCode==null){assetCode = "0";}
+								      System.out.println("Status for Group Asset First : " + assetstatus+"  groupAssetId: "+groupAssetId+"  assetCode: "+assetCode);
+								     // donetemp = comp.newassetinterface(errorMessage, integrifyId,assetstatus,groupAssetId,assetCode);
+//								      System.out.println("Status for Group Asset First : " + assetstatus+"  groupAssetId: "+groupAssetId);
+									 }
+//									 System.out.println("insertGroupAssetRecord statuk value:  "+statuk+"  <<<<<integrifyId: "+integrifyId);
+//									 String groupitemsNo1 = comp.findObject("SELECT count(*) FROM NEW_GROUP_ASSET_INTERFACE WHERE POSTED = 'N' AND TRAN_TYPE = 'N' AND INTEGRIFY_ID = '"+compintegrifyId+"'");
+//									 System.out.println("groupitemsNo1: "+groupitemsNo1+"   Inside Jobs2 integrifyId: "+integrifyId);
+									 	if(statuk !=""){lastMTID = comp.getCurrentMtid("am_asset_approval");
+//									 	  comp.setPendingTrans(comp.setApprovalData(assetId,assettype),"27",0);
+//									 	 comp.setPendingTransArchive(comp.setApprovalData(assetId,assettype),"27",Integer.parseInt(lastMTID),0);
+									 	boolean b = comp.updateNewApprovalAssetStatus(assetId,Integer.parseInt(UserID));
+									 if(assetRaiseEntry != null && assetRaiseEntry.equalsIgnoreCase("Y")){
+									    	if(assettype.equalsIgnoreCase("C")){								
+									    		url = "DocumentHelp.jsp?np=groupAssetPosting&amp;id="+assetId+"&pageDirect=Y";
+									    	}
+//									    	if(assettype.equalsIgnoreCase("U")){						    	
+//									    		url = "DocumentHelp.jsp?np=groupAssetPostingBranch&amp;id="+assetId+"&pageDirect=Y";
+//									    	}
+										  String flag= "";
+										  String partPay="";	
+//										  String groupitemsNo2 = comp.findObject("SELECT count(*) FROM NEW_GROUP_ASSET_INTERFACE WHERE POSTED = 'N' AND TRAN_TYPE = 'N' AND INTEGRIFY_ID = '"+compintegrifyId+"'");
+//											 System.out.println("groupitemsNo2: "+groupitemsNo2+"   Inside Jobs2 integrifyId: "+integrifyId);
+											
+								//		  String Name =comp.findObject(" SELECT full_name from am_gb_user where user_id="+Integer.parseInt(supervisor)+"");
+							//			  String branchName= comp.findObject(" SELECT branch_name from am_ad_branch where branch_code='"+branchCode+"'");
+										  //String description= ad.getDescription();
+										  String subjectT= comp.subjectToVat(assetId);
+										  String whT= comp.whTax(assetId);
+//										  	 System.out.println("Supervisor Name in Group: "+approvedbyName+"  User Id: "+Integer.parseInt(supervisor)+"<<<<assetCode: "+assetCode);
+										  if(assetCode==null) {assetCode = "0";}
+										  if((assetCode.equalsIgnoreCase(null))||(assetCode.equalsIgnoreCase(""))){assetCode = "0";}
+//										  System.out.println("New Asset Code: "+assetCode);
+//										  comp.insertApprovalx(assetId, Description, page1, flag, partPay,approvedbyName,branchName,subjectT,whT,url,lastMTID,Integer.parseInt(assetCode));
+											}		
+									 }
+//									 	 String groupitemsNo3 = comp.findObject("SELECT count(*) FROM NEW_GROUP_ASSET_INTERFACE WHERE POSTED = 'N' AND TRAN_TYPE = 'N' AND INTEGRIFY_ID = '"+compintegrifyId+"'");
+//										 System.out.println("groupitemsNo1: "+groupitemsNo3+"   Inside Jobs2 integrifyId: "+integrifyId);
+										
+//								 System.out.println("statux for Group Asset : " + statuk);
+								 	groupid = statuk;
+								/* 	
+							 	if(assettype.equalsIgnoreCase("C")){ 					 	
+							 		groupid = comp.findObject("SELECT distinct group_id FROM am_group_asset where INTEGRIFY='"+integrifyId +"'");
+								}
+							 	if(assettype.equalsIgnoreCase("U")){ 					 	
+							 		groupid = comp.findObject("SELECT distinct group_id FROM AM_GROUP_ASSET_UNCAPITALIZED where INTEGRIFY='"+integrifyId +"'");
+								}		
+							 	*/
+					//			 System.out.println("groupid for Group Asset : " + groupid);
+								 if(numOfTransactionLevel!=0){
+									if(noofitems!=0){assetstatus = "Y";
+									}else{assetstatus = "N";}
+									assetCode = " ";
+								 errorMessage=" Asset creation submitted for approval "; //assetstatus = "Y";
+								// comp.newassetinterface(errorMessage, integrifyId,assetstatus,groupid,assetCode);
+									 }
+								 else{
+									if(noofitems!=0){assetstatus = "Y";
+									}else{assetstatus = "N";}
+//									assetCode = " ";
+//									errorMessage=" Successfully Posted "; //assetstatus = "Y";
+//									System.out.println("groupid for Group Asset=====: " + groupid);
+//							    	 comp.newassetinterface(errorMessage, integrifyId,assetstatus,groupAssetId,assetCode);					 
+								    }
+								}
+								// }
+									 System.out.println("statuk for Group Asset=====: " + statuk);
+								 if(statuk !=""){
+									 //Read Asset Group Details 
+									 java.util.ArrayList grouprec =comp.getGroupDetailrecords(integrifyId);
+									 //int recpend = grouprec.size();
+//									 System.out.println("<<<<<<<<Group recpend Total No. >>>>>>  "+groupitemsNo);
+//									 String groupitemsNo = comp.findObject("SELECT count(*) FROM NEW_GROUP_ASSET_INTERFACE WHERE POSTED = 'N' AND TRAN_TYPE = 'N' AND INTEGRIFY_ID = '"+compintegrifyId+"'");
+									 int recpend = Integer.parseInt(groupitemsNo);
+									 System.out.println("<<<<<<<<noofitems>>>>>>  "+noofitems+" Group recpend: "+recpend);
+									 if(recpend!=0){
+									 if(noofitems==recpend){
+										 System.out.println("<<<<<<<<noofitems Equals recpend and grouprec.size()>>>>>>  "+grouprec.size());
+								     for(int i=0;i<grouprec.size();i++)
+								     {			
+								    	 int errorindex = i + 1;
+								    	 System.out.println("<<<<<<<<GROUP Loop>>>>>>  "+i);
+								    	newAssetTransaction  newrectrans = (newAssetTransaction)grouprec.get(i);    	 
+											String recintegrifyId =  newrectrans.getIntegrifyId();
+											// System.out.println(" recintegrifyId: "+recintegrifyId);
+											String recDescription = newrectrans.getDescription();
+											 //System.out.println(" recDescription: "+recDescription);
+											String recRegistrationNo = newrectrans.getRegistrationNo();
+											// System.out.println(" recRegistrationNo: "+recRegistrationNo);
+											String recVendorAC = newrectrans.getVendorAC();
+											// System.out.println(" recVendorAC: "+recVendorAC);
+											String recDatepurchased = newrectrans.getDatepurchased();
+											// System.out.println(" recDatepurchased: "+recDatepurchased);
+											String recAssetMake = newrectrans.getAssetMake();
+											//System.out.println(" recAssetMake: "+recAssetMake);
+											String recAssetModel = newrectrans.getAssetModel();
+											//System.out.println(" recAssetModel: "+recAssetModel);
+											String recAssetSerialNo = newrectrans.getAssetSerialNo();
+											//System.out.println(" recAssetSerialNo: "+recAssetSerialNo);
+											String recAssetEngineNo = newrectrans.getAssetEngineNo();
+											//System.out.println(" recAssetEngineNo: "+recAssetEngineNo);
+											String recSupplierName = newrectrans.getSupplierName();
+											//System.out.println(" recSupplierName: "+recSupplierName);
+											String recAssetUser = newrectrans.getAssetUser();
+											//System.out.println(" recAssetUser: "+recAssetUser);
+											String recAssetMaintenance = newrectrans.getAssetMaintenance();
+											double recVatableCost = newrectrans.getCostPrice();
+											String recAuthorizedBy = newrectrans.getAuthorizedBy();
+											String recWhTax = newrectrans.getWhTax();
+											String recPostingDate = newrectrans.getPostingDate();
+											String recEffectiveDate = newrectrans.getEffectiveDate();
+											String recPurchaseReason = newrectrans.getPurchaseReason();
+											String recSubjectTOVat = newrectrans.getSubjectTOVat();
+											//String AssetStatus = newrectrans.getAssetStatus();
+											String recState = newrectrans.getState();
+											String recDriver = newrectrans.getDriver();
+											String recUserName = newrectrans.getUserID();
+											String recbranchCode = newrectrans.getBranchCode();
+											String recsectionCode = newrectrans.getSectionCode();
+											String recdeptCode = newrectrans.getDeptCode();
+											String reccategoryCode = newrectrans.getCategoryCode();
+											String recsubcategoryCode = newrectrans.getSubcategoryCode();
+											String recbarCode = newrectrans.getBarCode();
+											String recsbuCode = newrectrans.getSbuCode();
+											String reclpo = newrectrans.getLpo();
+											String recinvoiceNo = newrectrans.getInvoiceNo();
+											String recsupervisorName = newrectrans.getSupervisor();
+											String recposted = newrectrans.getposted();
+											String recassetId = newrectrans.getAssetId();
+											String recassetCode = newrectrans.getAssetCode();
+											String recerrormessage = newrectrans.getErrormessage();
+											String recassettype = newrectrans.getAssetType();
+											double recwhtaxvalue = newrectrans.getWhTaxValue();
+											String rectranType = newrectrans.getTranType();
+											int recwhtaxrate = (int)whtaxvalue;
+											int recno = newassettrans.getNoofitems();
+											String reclocation = newassettrans.getLocation();
+											String recspare1 = newassettrans.getSpare1();
+											String recspare2 = newassettrans.getSpare2();
+											String recspare3 = newassettrans.getSpare3();
+											String recspare4 = newassettrans.getSpare4();
+											String recspare5 = newassettrans.getSpare5();
+											String recspare6 = newassettrans.getSpare6();
+											String recmemo = newassettrans.getMemo();
+											String recmemovalue = newassettrans.getMemovalue();
+											String recmultiple = newassettrans.getMultiple();
+											String rectranstype = "";
+											String recAssetStatus = "APPROVED";
+											//String recassetstatus = "";
+											String recinfofld = "";
+											String recassetexist = "";
+											double recCostPrice = recVatableCost;
+											double recwhtaxamount = 0.00;
+											double recvatamount = 0.00;	
+											String recUserID = "";
+											String recsupervisor = "";
+											String recsupervisor_confirm = "";
+											String unprocessedGrpAssets = "";
+											String recbranch_id = comp.findObject("SELECT BRANCH_ID FROM am_ad_branch WHERE BRANCH_CODE = '"+recbranchCode+"'");
+										//	String recUserID = comp.findObject("select full_name from am_gb_user where user_name = '"+recUserName+"' AND USER_STATUS = 'ACTIVE'");
+										//	String recsupervisor = comp.findObject("select full_name from am_gb_user where user_name = '"+recsupervisorName+"' AND USER_STATUS = 'ACTIVE'");
+					//						System.out.println("<<<<<<<< recUserName >>>>>>  "+recUserName);
+											//if(recmemovalue==null){recmemovalue=0;}
+											 if((!WhTax.equalsIgnoreCase(null)) && (!WhTax.equalsIgnoreCase("")) && (!WhTax.equalsIgnoreCase("N"))){				
+												 recwhtaxamount =  recVatableCost*(recwhtaxrate/100);
+											 }	
+//											 System.out.println("<<<<<<<< recSubjectTOVat >>>>>>  "+recSubjectTOVat);
+				/*							 if(recSubjectTOVat.equalsIgnoreCase("Y")){
+												 recvatamount = recVatableCost*vatrate;
+												 recCostPrice = recVatableCost + recvatamount;
+//												 System.out.println("<<<<<<<< recvatamount >>>>>>  "+recvatamount+" recCostPrice: "+recCostPrice);
+											 }*/
+											 if((!recSubjectTOVat.equalsIgnoreCase(null)) && (!recSubjectTOVat.equalsIgnoreCase("")) && (recSubjectTOVat.equalsIgnoreCase("Y"))){				
+												 recvatamount = recVatableCost*vatrate;
+												 recCostPrice = recVatableCost + recvatamount;
+											//	 System.out.println("whtaxamount:  "+whtaxamount);
+											 }	
+											if(recsupervisorName==null){recsupervisorName="";}
+											if(!recUserName.equalsIgnoreCase("")){recUserID = comp.findObject("select USER_ID from am_gb_user where user_name = '"+recUserName+"' AND USER_STATUS = 'ACTIVE'");}
+											if(!recsupervisorName.equalsIgnoreCase("")){recsupervisor = comp.findObject("select USER_ID from am_gb_user where user_name = '"+recsupervisorName+"' AND USER_STATUS = 'ACTIVE'");}
+											if(recsupervisor==null){recsupervisor="0";}
+											if(!recsupervisorName.equalsIgnoreCase("") && (recsupervisorName!=null))
+											{if(!recbranch_id.equalsIgnoreCase("")){recsupervisor_confirm = comp.findObject("select full_name from am_gb_user where user_Name = '"+recsupervisorName+"' AND IS_SUPERVISOR = 'Y' AND BRANCH = "+recbranch_id+" AND USER_STATUS = 'ACTIVE'");}}
+											
+					//						System.out.println("<<<<<<<< supervisorName >>>>>>  "+supervisorName);
+											String recuser_confirm = comp.findObject("select full_name from am_gb_user where user_name = '"+recUserName+"' AND USER_STATUS = 'ACTIVE'");
+											//String recsupervisor_confirm = comp.findObject("select full_name from am_gb_user where user_name = '"+recsupervisorName+"' AND IS_SUPERVISOR = 'Y' AND USER_STATUS = 'ACTIVE'");
+											assetstatus = "";
+											errorMessage = "";
+											if(numOfTransactionLevel==0){recAssetStatus = "APPROVED";}
+											 if(recuser_confirm.equalsIgnoreCase("")){
+											      assetstatus = "C";
+											      errorMessage = "Invalid User Name "+errorindex;
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+											      if(assettype.equalsIgnoreCase("C")){ 
+											      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");}
+											      }
+											      if(assettype.equalsIgnoreCase("U")){ 
+											      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM AM_GROUP_ASSET_UNCAPITALIZED WHERE INTEGRIFY = '"+integrifyId+"'");}
+											      }
+											      if(!integrifyId.equalsIgnoreCase("")){boolean delete2 = comp.deleteObject("DELETE FROM am_group_asset_archive WHERE INTEGRIFY = '"+integrifyId+"'");}								  
+											      if(!groupid.equalsIgnoreCase("")){boolean delete3 = comp.deleteObject("DELETE FROM am_asset_approval WHERE BATCH_ID = '"+groupid+"'");}
+											      if(!groupid.equalsIgnoreCase("")){boolean delete4 = comp.deleteObject("DELETE FROM am_group_asset_main WHERE GROUP_ID = '"+groupid+"'");}
+											      if(!groupid.equalsIgnoreCase("")){boolean delete6 = comp.deleteObject("DELETE FROM am_group_asset_main_archive WHERE GROUP_ID = '"+groupid+"'");}							      
+											 }	
+											 if(numOfTransactionLevel!=0){
+											 if(recsupervisor_confirm.equalsIgnoreCase("")){
+											      assetstatus = "C";
+											      errorMessage = "Invalid Supervisor "+errorindex;
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+											      if(assettype.equalsIgnoreCase("C")){ 
+											      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");}
+											      }
+											      if(assettype.equalsIgnoreCase("U")){ 
+											      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM AM_GROUP_ASSET_UNCAPITALIZED WHERE INTEGRIFY = '"+integrifyId+"'");}
+											      }
+											      if(!integrifyId.equalsIgnoreCase("")){boolean delete2 = comp.deleteObject("DELETE FROM am_group_asset_archive WHERE INTEGRIFY = '"+integrifyId+"'");}								  
+											      if(!groupid.equalsIgnoreCase("")){boolean delete3 = comp.deleteObject("DELETE FROM am_asset_approval WHERE BATCH_ID = '"+groupid+"'");}
+											      if(!groupid.equalsIgnoreCase("")){boolean delete4 = comp.deleteObject("DELETE FROM am_group_asset_main WHERE GROUP_ID = '"+groupid+"'");}
+											      if(!groupid.equalsIgnoreCase("")){boolean delete6 = comp.deleteObject("DELETE FROM am_group_asset_main_archive WHERE GROUP_ID = '"+groupid+"'");}							      
+											 }	
+											 }
+											 if((!recWhTax.equalsIgnoreCase("S"))&&(!recWhTax.equalsIgnoreCase("F")) && (!WhTax.equalsIgnoreCase("N"))){
+											      assetstatus = "C";
+											      errorMessage = "Invalid Withholding Tax Parameter in  "+errorindex;
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+											      if(assettype.equalsIgnoreCase("C")){ 	
+											      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");}
+											      }
+											      if(assettype.equalsIgnoreCase("U")){ 	
+											      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM AM_GROUP_ASSET_UNCAPITALIZED WHERE INTEGRIFY = '"+integrifyId+"'");}
+											      }
+											      if(!integrifyId.equalsIgnoreCase("")){boolean delete2 = comp.deleteObject("DELETE FROM am_group_asset_archive WHERE INTEGRIFY = '"+integrifyId+"'");}								  
+											      if(!groupid.equalsIgnoreCase("")){boolean delete3 = comp.deleteObject("DELETE FROM am_asset_approval WHERE BATCH_ID = '"+groupid+"'");}
+											      if(!groupid.equalsIgnoreCase("")){boolean delete4 = comp.deleteObject("DELETE FROM am_group_asset_main WHERE GROUP_ID = '"+groupid+"'");}
+											      if(!groupid.equalsIgnoreCase("")){boolean delete6 = comp.deleteObject("DELETE FROM am_group_asset_main_archive WHERE GROUP_ID = '"+groupid+"'");}
+											 }					 
+											 if((!recSubjectTOVat.equalsIgnoreCase("Y"))&&(!recSubjectTOVat.equalsIgnoreCase("N"))){
+											      assetstatus = "C";
+											      errorMessage = "Invalid Withholding Tax Parameter "+errorindex;
+											      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+											      if(assettype.equalsIgnoreCase("C")){ 	
+											      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");}
+											      }
+											      if(assettype.equalsIgnoreCase("U")){
+											      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM AM_GROUP_ASSET_UNCAPITALIZED WHERE INTEGRIFY = '"+integrifyId+"'");}
+											      }
+											      if(!integrifyId.equalsIgnoreCase("")){boolean delete2 = comp.deleteObject("DELETE FROM am_group_asset_archive WHERE INTEGRIFY = '"+integrifyId+"'");}								  
+											      if(!groupid.equalsIgnoreCase("")){boolean delete3 = comp.deleteObject("DELETE FROM am_asset_approval WHERE BATCH_ID = '"+groupid+"'");}
+											      if(!groupid.equalsIgnoreCase("")){boolean delete4 = comp.deleteObject("DELETE FROM am_group_asset_main WHERE GROUP_ID = '"+groupid+"'");}
+											      if(!groupid.equalsIgnoreCase("")){boolean delete6 = comp.deleteObject("DELETE FROM am_group_asset_main_archive WHERE GROUP_ID = '"+groupid+"'");}
+											 }								
+											System.out.println("recVatableCost : "+recVatableCost);
+											
+											String recsection_id = comp.findObject("SELECT SECTION_ID FROM am_ad_section WHERE SECTION_CODE = '"+recsectionCode+"'");
+											String recdept_id = comp.findObject("SELECT DEPT_ID FROM am_ad_department WHERE DEPT_CODE = '"+recdeptCode+"'");
+											String reccat_id = comp.findObject("SELECT CATEGORY_ID FROM am_ad_category WHERE CATEGORY_CODE = '"+reccategoryCode+"'");
+											String recsubcat_id = comp.findObject("SELECT SUB_CATEGORY_ID FROM AM_AD_SUB_CATEGORY WHERE SUB_CATEGORY_CODE = '"+recsubcategoryCode+"'");
+										//	 String lpo_confirm = comp.findObject("SELECT *FROM AM_INVOICE_NO WHERE LPO = '"+lpo+"'");
+//											 String invoice_confirm = comp.findObject("SELECT *FROM AM_INVOICE_NO WHERE INVOICE_NO = '"+invoiceNo+"'");
+//											 String lpo_confirm = comp.findObject("SELECT *FROM AM_INVOICE_NO WHERE LPO = '"+lpo+"'");
+//											 System.out.println("branch_confirm>>>>>> "+invoice_confirm+"  section_confirm:  "+section_id+" dept_confirm: "+dept_id
+//													 +" cat_confirm: "+cat_id+" invoice_confirm: "+invoice_confirm);
+											 if(recbranch_id.equalsIgnoreCase("")){errorMessage = errorMessage + " Invalid Branch : "+errorindex;}
+											 if(recsection_id.equalsIgnoreCase("")){errorMessage = errorMessage + " Invalid Section : "+errorindex;}
+											 if(recdept_id.equalsIgnoreCase("")){errorMessage = errorMessage + " Invalid Department : "+errorindex;}
+											 if(reccat_id.equalsIgnoreCase("")){errorMessage = errorMessage + " Invalid Category : "+errorindex;}
+											 if(recsubcat_id.equalsIgnoreCase("")){errorMessage = errorMessage + " Invalid Sub Category : "+errorindex;}
+											// if(!lpo_confirm.equalsIgnoreCase("")){errorMessage = errorMessage + "LPO Number Already Used : ";}
+//											 if((!invoice_confirm.equalsIgnoreCase("")) && (noofitems==0)){errorMessage = errorMessage + " Invoice Number already Used ";}
+//											 if((!lpo_confirm.equalsIgnoreCase("")) && (noofitems==0)){errorMessage = errorMessage + " LPO Number already Used ";}
+//											 System.out.println("errorMessage before Reducing recpend: "+errorMessage);
+											 if(errorMessage.equalsIgnoreCase("")){
+//												 System.out.println("Ckech Recpend: "+recpend);
+//											recpend = recpend - 1;
+											//groupid = comp.findObject("SELECT distinct group_id FROM am_group_asset where INTEGRIFY='"+integrifyId +"'");
+//											System.out.println("Matanmi : ");
+					    					//String groupid = comp.findObject("SELECT distinct group_id FROM am_group_asset where INTEGRIFY='"+integrifyId +"'");
+//											System.out.println("Matanmi 2 : "+groupid);
+											//String Supervisor_name = comp.findObject("select full_name from am_gb_user where user_id=(select supervisor from am_group_asset_main where group_id='"+groupid+"')");
+//											System.out.println("Matanmi 3 : "+groupid);
+											if(assettype.equalsIgnoreCase("C")){ 	
+												unprocessedGrpAssets = comp.findObject("select count(*) from am_group_asset where process_flag='N' and Group_id = '"+groupid+"'");
+											}
+											if(assettype.equalsIgnoreCase("U")){ 	
+												unprocessedGrpAssets = comp.findObject("select count(*) from AM_GROUP_ASSET_UNCAPITALIZED where process_flag='N' and Group_id = '"+groupid+"'");
+											}
+										//String unprocessedGrpAssets = adGroup.getUnprocessedGroupAsset(count_qry);
+											System.out.println("recCostPrice: "+recCostPrice+" recvatamount:  "+recvatamount+"  recassetId:  "+recassetId+"  unprocessedGrpAssets:  "+unprocessedGrpAssets);
+											System.out.println("groupid before update : "+groupid);
+										comp.updateVatableCostBalance(recCostPrice,recvatamount,groupid,unprocessedGrpAssets);
+//										System.out.println("New asset_ID : ");
+										System.out.println("supervisor>>>>>> "+recsupervisor+"  UserID: "+recUserID+"  whtaxamount: "+whtaxamount+"   recDatepurchased: "+recDatepurchased);
+										int chkCount=Integer.parseInt(unprocessedGrpAssets);
+										boolean savetrue = comp.save(recintegrifyId,recDescription,recRegistrationNo,recVendorAC,recDatepurchased,
+												recAssetMake,recAssetModel,recAssetSerialNo,recAssetEngineNo,recSupplierName,recAssetUser,recAssetMaintenance,
+												recCostPrice,recVatableCost,recAuthorizedBy,recWhTax,recwhtaxamount,recPostingDate,recEffectiveDate,recPurchaseReason,recSubjectTOVat,recAssetStatus,
+												recState,recDriver,recUserID,recbranchCode,recsectionCode,recdeptCode,reccategoryCode,recsubcategoryCode,recbarCode,recsbuCode,reclpo,recinvoiceNo,
+												recsupervisor,recposted,recassetId,recassetCode,recassettype,recbranch_id,recdept_id,recsection_id,reccat_id,recsubcat_id,recvatamount,
+												residualvalue,recwhtaxrate,groupid,recno,systemIp,recspare1,recspare2,recspare3,recspare4,recspare5,recspare6,projectCode,delimiter);
+										
+										if(savetrue== true){
+											recpend = recpend - 1;
+											 System.out.println("tablename to Group Detail:  "+tablename+"  integrifyId:  "+integrifyId+" recno:  "+recno);
+											if(assettype.equalsIgnoreCase("C")){ 	
+											 assetId = comp.findObject("SELECT ASSET_ID FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"' AND RECCOUNT = "+recno+"");
+											}
+											if(assettype.equalsIgnoreCase("U")){ 	
+												 assetId = comp.findObject("SELECT ASSET_ID FROM AM_GROUP_ASSET_UNCAPITALIZED WHERE INTEGRIFY = '"+integrifyId+"' AND RECCOUNT = "+recno+"");
+												}							
+											// infofld = comp.findtwoinfo("SELECT ASSET_ID, ASSET_CODE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"' AND RECCOUNT = "+recno+"");
+											// System.out.println("Information fld: "+infofld);
+											// String []others = infofld.split(",");
+											// assetId = others[0];
+											// assetCode = others[1];	
+											if(assettype.equalsIgnoreCase("C")){ 	
+											 assetCode = comp.findObject("SELECT ASSET_CODE FROM am_asset WHERE ASSET_ID = '"+assetId+"' ");
+											}
+											if(assettype.equalsIgnoreCase("U")){ 	
+												 assetCode = comp.findObject("SELECT ASSET_CODE FROM AM_ASSET_UNCAPITALIZED WHERE ASSET_ID = '"+assetId+"' ");
+												}							
+											 if(numOfTransactionLevel!=0){
+											 if(noofitems!=0){assetstatus = "Y";
+												}else{assetstatus = "N";}
+											 errorMessage="Asset creation submitted for approval"; //assetstatus = "Y";
+											 //comp.newgroupassetinterface(errorMessage, recno,assetstatus,assetId,assetCode,recintegrifyId);
+										     }
+											 else{
+												 if(noofitems!=0){assetstatus = "Y";
+													}else{assetstatus = "N";}								 
+												 errorMessage=" Successfully Posted "; //assetstatus = "Y";
+												 //comp.newgroupassetinterface(errorMessage, recno,assetstatus,assetId,assetCode,recintegrifyId);								 
+											 }
+								        }
+									
+								 }
+										else{
+										      assetstatus = "C";
+										      //errorMessage = "Invalid User Name "+i;
+										      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+										      if(assettype.equalsIgnoreCase("C")){ 	
+										      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");}
+										      }
+										      if(assettype.equalsIgnoreCase("U")){ 	
+										      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM AM_GROUP_ASSET_UNCAPITALIZED WHERE INTEGRIFY = '"+integrifyId+"'");}
+										      }
+										      if(!integrifyId.equalsIgnoreCase("")){boolean delete2 = comp.deleteObject("DELETE FROM am_group_asset_archive WHERE INTEGRIFY = '"+integrifyId+"'");}								  
+										      if(!groupid.equalsIgnoreCase("")){boolean delete3 = comp.deleteObject("DELETE FROM am_asset_approval WHERE BATCH_ID = '"+groupid+"'");}
+										      if(!groupid.equalsIgnoreCase("")){boolean delete4 = comp.deleteObject("DELETE FROM am_group_asset_main WHERE GROUP_ID = '"+groupid+"'");}
+										      if(!groupid.equalsIgnoreCase("")){boolean delete6 = comp.deleteObject("DELETE FROM am_group_asset_main_archive WHERE GROUP_ID = '"+groupid+"'");}							      
+											
+										}
+									 }  //Matanmi
+										String validateapproval = comp.findObject("SELECT ASSET_ID FROM NEW_ASSET_INTERFACE WHERE INTEGRIFY_ID = '"+integrifyId+"'");
+										System.out.println("Jobs2 validateapproval: "+validateapproval);
+										if(!validateapproval.equalsIgnoreCase("")){
+											System.out.println("Inside Jobs2 integrifyId: "+integrifyId);
+										  comp.setPendingTrans(comp.setApprovalData(assetId,assettype),"27",Integer.parseInt(integrifyId));
+										   lastMTID = comp.getCurrentMtid("am_asset_approval");
+										  comp.setPendingTransArchive(comp.setApprovalData(assetId,assettype),"27",Integer.parseInt(lastMTID),Integer.parseInt(integrifyId));
+										  comp.updateAssetStatusChange("update am_asset_approval set batch_id='"+validateapproval+"' where asset_code='"+integrifyId+"'");
+										  comp.updateAssetStatusChange("update am_asset_approval_archive set batch_id='"+validateapproval+"' where asset_code='"+integrifyId+"'");
+										  boolean b = comp.updateNewApprovalAssetStatus(assetId,Integer.parseInt(UserID));
+									}	
+										System.out.println("Final Group Id: "+groupAssetId);
+									      assetstatus = "Y";
+									      errorMessage = "Successfully Posted; ";
+									    //  donetemp = comp.newassetinterface(errorMessage, integrifyId,assetstatus,groupAssetId,assetCode);
+
+								}
+									 else{
+									      assetstatus = "C";
+									      errorMessage = "Quantity is not Equal to Record Number";
+									      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+									      if(assettype.equalsIgnoreCase("C")){ 	
+									      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM am_group_asset WHERE INTEGRIFY = '"+integrifyId+"'");}
+									      }
+									      if(assettype.equalsIgnoreCase("U")){ 	
+									      if(!integrifyId.equalsIgnoreCase("")){boolean delete1 = comp.deleteObject("DELETE FROM AM_GROUP_ASSET_UNCAPITALIZED WHERE INTEGRIFY = '"+integrifyId+"'");}
+									      }
+									      if(!integrifyId.equalsIgnoreCase("")){boolean delete2 = comp.deleteObject("DELETE FROM am_group_asset_archive WHERE INTEGRIFY = '"+integrifyId+"'");}
+									      if(!groupid.equalsIgnoreCase("")){boolean delete3 = comp.deleteObject("DELETE FROM am_asset_approval WHERE BATCH_ID = '"+groupid+"'");}
+									      if(!groupid.equalsIgnoreCase("")){boolean delete4 = comp.deleteObject("DELETE FROM am_group_asset_main WHERE GROUP_ID = '"+groupid+"'");}
+										  //String delete5 = comp.findObject("DELETE FROM AM_ASSET_UNCAPITALIZED WHERE INTEGRIFY = '"+integrifyId+"'");
+									      if(!groupid.equalsIgnoreCase("")){boolean delete6 = comp.deleteObject("DELETE FROM am_group_asset_main_archive WHERE GROUP_ID = '"+groupid+"'");}
+										  
+									      
+									 }
+								}  
+								}
+								}				
+								 }
+							else{
+								 assetstatus = "C";
+								// boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+							//	System.out.println("Record Successfully Updated 2>>> ");
+								}
+				/*			 } //Integrify Exist
+							 else{ 
+							      assetstatus = "C";
+							      errorMessage = "Integrify Id already exists";
+							      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+							 //     System.out.println("Record Successfully Updated 2>>> ");
+							 }*/
+							 }
+								 else{
+								      assetstatus = "C";
+								      errorMessage = "Invoice Can not be Null";
+								      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+								//      System.out.println("Record Successfully Updated 3>>> ");
+								 }
+
+							}
+								
+							 }
+				/*			 else{ 
+							      assetstatus = "C";
+							      errorMessage = "Integrify Id already exists";
+							      // boolean done = comp.newassetinterface(errorMessage, integrifyId,assetstatus,assetId,assetCode);
+							 //     System.out.println("Record Successfully Updated 2>>> ");
+							 }*/				 
+								 //else() Integrify Test
+								 oldintegrify=integrifyId;
+								//errorMessage = "";
+								// System.out.println("====List Size: "+k);
+								 k++;
+								 data.put("asset_id", assetId);
+								 data.put("message", errorMessage.toString());
+								 } finally {
+									 System.out.println(
+								                "execution complete..");
+								 }
+		     }
+		     }else {
+				 data.put("asset_id", "");
+				 data.put("message", "ThirdParty Application is not Enabled.");
+			 }
+	    	} catch(Exception e) {
+        	e.getMessage();
+        }	    
+	    
+	    return data.toString();
+	}
 	
 	
 	

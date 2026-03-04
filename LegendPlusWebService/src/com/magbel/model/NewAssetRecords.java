@@ -1,6 +1,7 @@
 package com.magbel.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class NewAssetRecords {
 	
@@ -140,6 +141,75 @@ public class NewAssetRecords {
 	   // newTransaction.setSystemIP(request.System_IP);
 
 	    list.add(newTransaction);
+	    return list;
+	}
+
+	
+	public ArrayList<groupAssetTransaction> getGroupAssetSqlRecords(List<GroupAssetRequest> requests) {
+	    ArrayList<groupAssetTransaction> list = new ArrayList<>();
+
+	    for (GroupAssetRequest request : requests) {
+	    	groupAssetTransaction newTransaction = new groupAssetTransaction();
+
+	        newTransaction.setIntegrifyId(request.INTEGRIFY_ID);
+	        newTransaction.setDescription(request.Description);
+	        newTransaction.setRegistrationNo(request.Registration_No);
+	        newTransaction.setVendorAC(request.Vendor_AC);
+	        newTransaction.setDatepurchased(request.Date_purchased);
+	        newTransaction.setAssetMake(String.valueOf(request.Asset_Make));
+	        newTransaction.setAssetModel(request.Asset_Model);
+	        newTransaction.setAssetSerialNo(request.Asset_Serial_No);
+	        newTransaction.setAssetEngineNo(request.Asset_Engine_No);
+	        newTransaction.setSupplierName(request.Supplier_Name);
+	        newTransaction.setAssetUser(request.Asset_User);
+	        newTransaction.setAssetMaintenance(String.valueOf(request.Asset_Maintenance));
+	        newTransaction.setCostPrice(request.Cost_Price);
+	        newTransaction.setAuthorizedBy(request.Authorized_By);
+	        newTransaction.setWhTax(request.Wh_Tax);
+	        newTransaction.setPostingDate(request.Posting_Date);
+	        newTransaction.setEffectiveDate(request.Effective_Date);
+	        newTransaction.setPurchaseReason(request.Purchase_Reason);
+	        newTransaction.setSubjectTOVat(request.Subject_TO_Vat);
+	        newTransaction.setAssetStatus(request.Asset_Status);
+	        newTransaction.setState(String.valueOf(request.State));
+	        newTransaction.setDriver(request.Driver);
+	        newTransaction.setUserID(request.User_ID);
+	        newTransaction.setBranchCode(request.BRANCH_CODE);
+	        newTransaction.setSectionCode(request.SECTION_CODE);
+	        newTransaction.setDeptCode(request.DEPT_CODE);
+	        newTransaction.setCategoryCode(request.CATEGORY_CODE);
+	        newTransaction.setSubcategoryCode(request.SUB_CATEGORY_CODE);
+	        newTransaction.setBarCode(request.BAR_CODE);
+	        newTransaction.setSbuCode(request.SBU_CODE);
+	        newTransaction.setLpo(request.LPO);
+	        newTransaction.setInvoiceNo(request.INVOICE_NO);
+	        newTransaction.setSupervisor(request.supervisor);
+	        newTransaction.setPosted(request.POSTED);
+	        newTransaction.setAssetId(request.ASSET_ID);
+	        newTransaction.setAssetCode(request.ASSET_CODE);
+	        newTransaction.setErrormessage(request.ERROR_MESSAGE);
+	        newTransaction.setAssetType(request.ASSET_TYPE);
+	        newTransaction.setTranType(request.TRAN_TYPE);
+	        newTransaction.setWhTaxValue(request.Wh_Tax_Value);
+	        newTransaction.setVatValue(request.Vat_Value);
+	        newTransaction.setNoofitems(request.NoOfItem); // Make sure to choose the correct one if both exist
+	        newTransaction.setLocation(String.valueOf(request.Location));
+	        newTransaction.setSpare1(request.Spare_1);
+	        newTransaction.setSpare2(request.Spare_2);
+	        newTransaction.setSpare3(request.Spare_3);
+	        newTransaction.setSpare4(request.Spare_4);
+	        newTransaction.setSpare5(request.Spare_5);
+	        newTransaction.setSpare6(request.Spare_6);
+	        newTransaction.setMultiple(request.Multiple);
+	        newTransaction.setMemo(request.Memo);
+	        newTransaction.setMemovalue(request.MemoValue);
+	        newTransaction.setUsefullife(request.IMPROV_USEFULLIFE);
+	        newTransaction.setProjectCode(request.PROJECT_CODE);
+	        // newTransaction.setSystemIP(request.System_IP); // uncomment if applicable
+
+	        list.add(newTransaction);
+	    }
+
 	    return list;
 	}
 

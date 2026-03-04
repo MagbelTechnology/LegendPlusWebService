@@ -6211,7 +6211,7 @@ return dateDifferencesMills;
             ////////////To set values for approval table
 
             ps = con.prepareStatement(pq);
-            System.out.println("a[6] in setPendingTrans===: "+a[6] + " super_id: " + a[2]);
+           // System.out.println("a[6] in setPendingTrans===: "+a[6] + " super_id: " + a[2]);
             String dd = a[6].substring(0,2);
             String mm = a[6].substring(3,5);
             String yyyy = a[6].substring(6,10);
@@ -6221,7 +6221,9 @@ return dateDifferencesMills;
 
             String mtid =  new ApplicationHelper().getGeneratedId("am_asset_approval");
             ps.setString(1, (a[0]==null)?"":a[0]);
+            System.out.println(" user-id====: "+a[1]);
             ps.setString(2, (a[1]==null)?"":a[1]);
+            System.out.println(" super-id====: "+a[2]);
             ps.setString(3, (a[2]==null)?"":a[2]);
             ps.setDouble(4, (a[3]==null)?0:Double.parseDouble(a[3]));
             //ps.setDate(5, (a[4])==null?null:dbConnection.dateConvert(a[4]));
@@ -7712,6 +7714,7 @@ AssetPaymentManager payment = null;
 				residualvalue,whtaxvalue,noofitems,warrantyStartDate,expiryDate,depreciation_end_date,
 				SystemIp,require_depreciation,accum_dep,rate,require_redistribution);
 		String groupexist = findObject("SELECT DISTINCT GROUP_ID FROM AM_GROUP_ASSET_MAIN WHERE GROUP_ID = '"+gid+"'");
+		 System.out.println("gid:  "+gid);
 //		System.out.println(">>>>>>>>>  GENERATED groupexist IN createGroupMain <<<<<<<<<< " + groupexist+"  itemsCount: "+itemsCount);
 		try {
 //			if(groupexist.equals("")){
